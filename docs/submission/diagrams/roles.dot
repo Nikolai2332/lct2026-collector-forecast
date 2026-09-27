@@ -1,0 +1,25 @@
+// Рисунок: функции сервиса и роли заказчика (роли складываются)
+digraph roles {
+  graph [rankdir=LR, fontname="PT Sans", nodesep=0.18, ranksep=1.4, pad=0.2, bgcolor=white];
+  node  [fontname="PT Sans", fontsize=12, margin="0.12,0.06"];
+  edge  [color="#8c8c8c", penwidth=1.0, arrowsize=0.6];
+  subgraph cluster_r { label="Роли (область видимости)"; fontsize=13; color="#d9d9d9";
+    node [shape=box, style="rounded,filled", fillcolor="#e6f4ff", color="#1677ff"];
+    ods [label="Диспетчер ОДС\n(все объекты)"]; dis [label="Диспетчер района\n(дерево района)"];
+    tec [label="Техник\n(один комплекс)"]; man [label="Руководитель\n(район, чтение)"];
+    eng [label="Инженер данных\n(все объекты)"]; adm [label="Администратор\n(все объекты)"];
+  }
+  subgraph cluster_f { label="Функции"; fontsize=13; color="#d9d9d9";
+    node [shape=box, style="filled", fillcolor="#fafafa", color="#bfbfbf"];
+    view [label="Дашборд, схема, журналы,\nкарточки, качество модели,\nвыгрузки — в своей области"];
+    dec  [label="Решение по прогнозу"];
+    wo   [label="Создание и правка заявок"];
+    st   [label="Смена статуса заявки"];
+    imp  [label="Импорт данных,\nпоток событий"];
+    sim  [label="Симуляция потока"];
+    set  [label="Настройки, роли\nи области пользователей"];
+  }
+  {ods dis tec man eng adm} -> view;
+  {ods dis eng adm} -> dec; {ods dis eng adm} -> wo; {ods dis tec eng adm} -> st;
+  {eng adm} -> imp; {ods eng adm} -> sim; adm -> set;
+}

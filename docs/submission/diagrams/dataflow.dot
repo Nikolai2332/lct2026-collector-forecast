@@ -1,0 +1,22 @@
+// Рисунок: поток данных — что работает онлайн, что офлайн
+digraph flow {
+  graph [rankdir=TB, fontname="PT Sans", nodesep=0.3, ranksep=0.35, pad=0.2, bgcolor=white];
+  node  [shape=box, style="rounded,filled", fontname="PT Sans", fontsize=12, fillcolor="#e6f4ff", color="#1677ff", margin="0.14,0.07"];
+  edge  [fontname="PT Sans", fontsize=10, color="#595959"];
+  subgraph cluster_off { label="Офлайн (по расписанию или вручную)"; fontsize=12; color="#d46b08"; style=dashed;
+    csv [label="Журналы CSV 2019–2026\n313,5 млн строк"]; etl [label="ETL: чистка, вид значения,\n2019–2021 исключены"];
+    lab [label="Разметка отказов:\nсвязь, «Неисправен»,\n«Отключено», «Сбой значения»;\nгрупповая тишина — не отказ"];
+    fe  [label="Признаки (126)\nпо окнам 1 ч … 90 д"]; tr [label="Обучение LightGBM\nвалидация 2-е полугодие 2025\nтест 2026 (открыт один раз)"];
+    pr  [label="predict(at): прогноз\nна все каналы"];
+    csv -> etl -> lab -> fe -> tr -> pr;
+  }
+  subgraph cluster_on { label="Онлайн (сервис)"; fontsize=12; color="#1677ff"; style=dashed;
+    db [label="PostgreSQL: прогнозы,\nисходы, события, справочники", shape=cylinder, fillcolor="#f6ffed", color="#389e0d"];
+    in [label="Поток событий СМВУ\nPOST /api/ingest/events\n(событие в карточке — 45 мс)"];
+    ui [label="Экраны, рекомендации ТО,\nуведомления SSE (≈ 1 с)"];
+    dsp [label="Решения диспетчера,\nзаявки, журнал действий", fillcolor="#fff7e6", color="#d46b08"];
+    in -> db; db -> ui -> dsp -> db;
+  }
+  pr -> db [label="загрузка прогнозов\nи исходов"];
+  db -> fe [label="нет онлайн-пересчёта:\nпуть — ML-воркер по окну 90 дней", style=dashed, color="#cf1322", fontcolor="#cf1322"];
+}

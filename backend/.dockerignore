@@ -1,0 +1,14 @@
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+tests
+*.db
+# Секреты и данные в образ не попадают
+.env
+.env.*
+*.csv
+*.parquet
+*.xlsx
+*.dump
+backups

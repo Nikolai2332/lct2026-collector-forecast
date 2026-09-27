@@ -1,0 +1,97 @@
+# Тестовый каталог для живой проверки входа через LDAP (только для стенда, пароли — тестовые).
+dn: ou=people,dc=collector,dc=test
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=groups,dc=collector,dc=test
+objectClass: organizationalUnit
+ou: groups
+
+dn: uid=ivanov,ou=people,dc=collector,dc=test
+objectClass: inetOrgPerson
+uid: ivanov
+cn: Иванов Иван Иванович
+sn: Иванов
+displayName: Иванов И. И.
+userPassword: Disp-Test-2026
+
+dn: uid=petrova,ou=people,dc=collector,dc=test
+objectClass: inetOrgPerson
+uid: petrova
+cn: Петрова Анна
+sn: Петрова
+userPassword: Eng-Test-2026
+
+dn: uid=sidorov,ou=people,dc=collector,dc=test
+objectClass: inetOrgPerson
+uid: sidorov
+cn: Сидоров Пётр
+sn: Сидоров
+userPassword: Adm-Test-2026
+
+dn: uid=kuznetsov,ou=people,dc=collector,dc=test
+objectClass: inetOrgPerson
+uid: kuznetsov
+cn: Кузнецов без группы
+sn: Кузнецов
+userPassword: Nog-Test-2026
+
+dn: cn=dispatchers,ou=groups,dc=collector,dc=test
+objectClass: groupOfNames
+cn: dispatchers
+member: uid=ivanov,ou=people,dc=collector,dc=test
+
+dn: cn=engineers,ou=groups,dc=collector,dc=test
+objectClass: groupOfNames
+cn: engineers
+member: uid=petrova,ou=people,dc=collector,dc=test
+
+dn: cn=admins,ou=groups,dc=collector,dc=test
+objectClass: groupOfNames
+cn: admins
+member: uid=sidorov,ou=people,dc=collector,dc=test
+
+# Ролевая модель заказчика: техник видит один комплекс (группа комплекса → область), ОДС — всё
+dn: uid=smirnov,ou=people,dc=collector,dc=test
+objectClass: inetOrgPerson
+uid: smirnov
+cn: Смирнов Олег
+sn: Смирнов
+displayName: Смирнов О. (техник)
+userPassword: Tech-Test-2026
+
+dn: uid=volkov,ou=people,dc=collector,dc=test
+objectClass: inetOrgPerson
+uid: volkov
+cn: Волков без комплекса
+sn: Волков
+userPassword: Tech-Nog-2026
+
+dn: uid=orlova,ou=people,dc=collector,dc=test
+objectClass: inetOrgPerson
+uid: orlova
+cn: Орлова Мария
+sn: Орлова
+displayName: Орлова М. (ОДС)
+userPassword: Ods-Test-2026
+
+dn: cn=technicians,ou=groups,dc=collector,dc=test
+objectClass: groupOfNames
+cn: technicians
+member: uid=smirnov,ou=people,dc=collector,dc=test
+member: uid=volkov,ou=people,dc=collector,dc=test
+
+dn: cn=ods,ou=groups,dc=collector,dc=test
+objectClass: groupOfNames
+cn: ods
+member: uid=orlova,ou=people,dc=collector,dc=test
+
+dn: cn=district-main,ou=groups,dc=collector,dc=test
+objectClass: groupOfNames
+cn: district-main
+member: uid=ivanov,ou=people,dc=collector,dc=test
+
+dn: cn=complex-alpha,ou=groups,dc=collector,dc=test
+objectClass: groupOfNames
+cn: complex-alpha
+member: uid=smirnov,ou=people,dc=collector,dc=test

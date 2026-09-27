@@ -1,0 +1,25 @@
+# Реверс-прокси production: TLS от Let's Encrypt (сертификат получается и продлевается сам).
+# Домен — DOMAIN в .env; DNS-запись A должна указывать на сервер, порты 80 и 443 открыты.
+# Для локальной проверки DOMAIN=localhost: Caddy выпустит сертификат своим внутренним CA.
+{
+	# Служебный API Caddy не нужен
+	admin off
+}
+
+{$DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+		-Via
+	}
+
+	# Всё — во frontend (Nginx): статика, /api с лимитами и заголовками безопасности, SSE.
+	# API и БД наружу не публикуются. Журнал запросов Caddy выключен (нет директивы log),
+	# поэтому query-строки в логи прокси не попадают
+	reverse_proxy frontend:80 {
+		# SSE: отдавать события сразу, без буферизации
+		flush_interval -1
+	}
+}

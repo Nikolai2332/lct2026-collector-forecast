@@ -1,0 +1,25 @@
+// Рисунок: компонентная архитектура (production-режим)
+digraph comp {
+  graph [rankdir=TB, fontname="PT Sans", nodesep=0.4, ranksep=0.55, pad=0.2, bgcolor=white, compound=true];
+  node  [shape=box, style="rounded,filled", fontname="PT Sans", fontsize=15, fillcolor="#e6f4ff", color="#1677ff", margin="0.16,0.10"];
+  edge  [fontname="PT Sans", fontsize=13, color="#595959"];
+  user [label="Браузер диспетчера\n(Chrome, Яндекс.Браузер)", shape=box, style="filled", fillcolor="#fafafa", color="#8c8c8c"];
+  caddy [label="Caddy\nTLS 1.2+, HTTPS, HSTS\n(порты 80/443)", fillcolor="#fff7e6", color="#d46b08"];
+  subgraph cluster_docker { label="Docker (Linux), внутренняя сеть"; fontsize=15; color="#bfbfbf"; style=dashed;
+    web [label="Фронтенд\nReact + Ant Design + ECharts\nNginx (CSP, заголовки)"];
+    api [label="API FastAPI (uvicorn)\nREST + OpenAPI, SSE,\nроли и области, audit_log"];
+    sch [label="APScheduler в процессе API\nтакт симуляции, разметка\nисходов, прогрев кэша"];
+    db  [label="PostgreSQL 16\nоперативный контур:\nсправочники, прогнозы,\nсобытия 30 дней, решения, заявки", shape=cylinder, fillcolor="#f6ffed", color="#389e0d"];
+    bak [label="backup\npg_dump раз в 24 ч,\n14 копий", fillcolor="#f5f5f5", color="#8c8c8c"];
+  }
+  ldap [label="LDAP / Active Directory\n(ldaps://, только чтение)", style="filled", fillcolor="#fafafa", color="#8c8c8c"];
+  smvu [label="СМВУ / внешние системы\n(поток событий, импорт)", style="filled", fillcolor="#fafafa", color="#8c8c8c"];
+  subgraph cluster_ml { label="ML-конвейер (офлайн, ml/)"; fontsize=15; color="#bfbfbf"; style=dashed;
+    etl [label="ETL DuckDB\nCSV → Parquet"]; parq [label="Parquet\nархив событий", shape=cylinder, fillcolor="#f6ffed", color="#389e0d"];
+    feat [label="Признаки,\nLightGBM, predict(at)"];
+  }
+  user -> caddy [label="HTTPS"]; caddy -> web; web -> api [label="/api, SSE"];
+  api -> db [dir=both]; sch -> db [dir=both, style=dashed]; api -> sch [style=invis]; bak -> db [label="чтение"];
+  api -> ldap [label="bind, группы"]; smvu -> api [label="POST /api/ingest/events\nPOST /api/import"];
+  etl -> parq -> feat; feat -> db [label="прогнозы, исходы,\nметрики (загрузка)"];
+}

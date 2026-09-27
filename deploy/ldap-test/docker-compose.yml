@@ -1,0 +1,45 @@
+# Живая проверка входа через LDAP: OpenLDAP (ldaps://, свой УЦ) + API стека с LDAP_ENABLED=true.
+# Только для изолированного стенда (пароли тестовые). Запуск из корня репозитория, вместе с основным compose-файлом:
+#   API_PORT=19100 FRONTEND_PORT=19180 POSTGRES_PORT=25532 \
+#     docker compose -p recs -f docker-compose.yml -f deploy/ldap-test/docker-compose.yml up -d --build
+#   python deploy/ldap-test/check_ldap.py http://localhost:19100
+# Убрать: docker compose -p recs -f docker-compose.yml -f deploy/ldap-test/docker-compose.yml down -v
+services:
+  ldap:
+    # osixia/openldap:1.5.0 + тестовый каталог ldif/ (Dockerfile рядом)
+    build: ./deploy/ldap-test
+    hostname: ldap
+    environment:
+      LDAP_ORGANISATION: "Collector test"
+      LDAP_DOMAIN: collector.test
+      LDAP_ADMIN_PASSWORD: ldap-admin-test-only
+      # Сервисная учётка только для чтения (cn=svc-readonly,dc=collector,dc=test) — ею API ищет пользователей
+      LDAP_READONLY_USER: "true"
+      LDAP_READONLY_USER_USERNAME: svc-readonly
+      LDAP_READONLY_USER_PASSWORD: svc-test-only
+      # TLS включён (самоподписанный УЦ образа), клиентский сертификат не требуется
+      LDAP_TLS_VERIFY_CLIENT: try
+    volumes:
+      # Сюда образ кладёт свой УЦ и сертификат сервера (CN=ldap); ca.crt отсюда читает API
+      - ldapcerts:/container/service/slapd/assets/certs
+
+  api:
+    depends_on:
+      ldap:
+        condition: service_started
+    environment:
+      LDAP_ENABLED: "true"
+      LDAP_URL: ldaps://ldap:636
+      LDAP_CA_FILE: /ldap-certs/ca.crt
+      LDAP_BASE_DN: dc=collector,dc=test
+      LDAP_BIND_DN: cn=svc-readonly,dc=collector,dc=test
+      LDAP_BIND_PASSWORD: svc-test-only
+      LDAP_USER_FILTER: (uid={username})
+      LDAP_ROLE_GROUPS: admin:cn=admins;engineer:cn=engineers;dispatcher:cn=dispatchers;manager:cn=managers;technician:cn=technicians;dispatcher_ods:cn=ods
+      # Область по группам: 1 — район демо-сида, 2 — «объект Альфа» (id объектов стенда — из демо-сида)
+      LDAP_SCOPE_GROUPS: 1:cn=district-main;2:cn=complex-alpha
+    volumes:
+      - ldapcerts:/ldap-certs:ro
+
+volumes:
+  ldapcerts:

@@ -1,0 +1,1569 @@
+{
+ "model_version": "lgbm-2026.09-v2",
+ "test_period": [
+  "2026-01-01",
+  "2026-06-29"
+ ],
+ "threshold": 0.34536082474226804,
+ "days": 180,
+ "overall": {
+  "precision": 0.6202538708327521,
+  "recall": 0.7033088700493484,
+  "f1": 0.6591754747468758,
+  "tp": 22233,
+  "fp": 13612,
+  "fn": 9379,
+  "pr_auc": 0.6828297900507112,
+  "support": 31612,
+  "rows": 1478388
+ },
+ "baseline": {
+  "precision": 0.06360631910438981,
+  "recall": 0.23256991016069847,
+  "f1": 0.09989266158507588,
+  "tp": 7352,
+  "fp": 108234,
+  "fn": 24260,
+  "support": 31612
+ },
+ "by_sensor_type": [
+  {
+   "precision": 1.0,
+   "recall": 0.9375,
+   "f1": 0.967741935483871,
+   "tp": 15,
+   "fp": 0,
+   "fn": 1,
+   "sensor_type": "9-секционный люк",
+   "support": 16,
+   "rows": 1072,
+   "pr_auc": 0.9387269938650307
+  },
+  {
+   "precision": 0.5532915360501567,
+   "recall": 0.4969497888315345,
+   "f1": 0.5236093943139679,
+   "tp": 1059,
+   "fp": 855,
+   "fn": 1072,
+   "sensor_type": "Газовый датчик",
+   "support": 2131,
+   "rows": 50412,
+   "pr_auc": 0.5537757095891779
+  },
+  {
+   "precision": 0.774572886620812,
+   "recall": 0.922324966974901,
+   "f1": 0.8420164013506993,
+   "tp": 3491,
+   "fp": 1016,
+   "fn": 294,
+   "sensor_type": "Датчик движения",
+   "support": 3785,
+   "rows": 102902,
+   "pr_auc": 0.9007358749613495
+  },
+  {
+   "precision": 0.25772446383133407,
+   "recall": 0.5360383064516129,
+   "f1": 0.34808935438998445,
+   "tp": 2127,
+   "fp": 6126,
+   "fn": 1841,
+   "sensor_type": "Датчик дыма",
+   "support": 3968,
+   "rows": 556931,
+   "pr_auc": 0.23905388724100007
+  },
+  {
+   "precision": 0.8703703703703703,
+   "recall": 1.0,
+   "f1": 0.9306930693069307,
+   "tp": 47,
+   "fp": 7,
+   "fn": 0,
+   "sensor_type": "Датчик затопления",
+   "support": 47,
+   "rows": 3238,
+   "pr_auc": 0.9479640044754333
+  },
+  {
+   "precision": 0.7642083897158322,
+   "recall": 0.9420350291909925,
+   "f1": 0.8438550616361599,
+   "tp": 2259,
+   "fp": 697,
+   "fn": 139,
+   "sensor_type": "Датчик температуры",
+   "support": 2398,
+   "rows": 93640,
+   "pr_auc": 0.8982498591983911
+  },
+  {
+   "precision": 0.78515625,
+   "recall": 0.8777292576419214,
+   "f1": 0.8288659793814432,
+   "tp": 201,
+   "fp": 55,
+   "fn": 28,
+   "sensor_type": "ИБП",
+   "support": 229,
+   "rows": 11113,
+   "pr_auc": 0.8155668137421219
+  },
+  {
+   "precision": 0.8611378977820636,
+   "recall": 0.9561027837259101,
+   "f1": 0.9061390157280569,
+   "tp": 893,
+   "fp": 144,
+   "fn": 41,
+   "sensor_type": "КД АВ",
+   "support": 934,
+   "rows": 55879,
+   "pr_auc": 0.9297810402752191
+  },
+  {
+   "precision": 0.7588058419243986,
+   "recall": 0.960054347826087,
+   "f1": 0.8476487523992322,
+   "tp": 3533,
+   "fp": 1123,
+   "fn": 147,
+   "sensor_type": "КД Дверь",
+   "support": 3680,
+   "rows": 131356,
+   "pr_auc": 0.8917270643477139
+  },
+  {
+   "precision": 0.918918918918919,
+   "recall": 0.9714285714285714,
+   "f1": 0.9444444444444445,
+   "tp": 102,
+   "fp": 9,
+   "fn": 3,
+   "sensor_type": "КД Люк",
+   "support": 105,
+   "rows": 7318,
+   "pr_auc": 0.9537619641275937
+  },
+  {
+   "precision": 0.7080209895052474,
+   "recall": 0.8586363636363636,
+   "f1": 0.7760887428101889,
+   "tp": 1889,
+   "fp": 779,
+   "fn": 311,
+   "sensor_type": "Переключатель",
+   "support": 2200,
+   "rows": 105739,
+   "pr_auc": 0.8167840573456816
+  },
+  {
+   "precision": 0.5012106537530266,
+   "recall": 0.3354943273905997,
+   "f1": 0.40194174757281553,
+   "tp": 207,
+   "fp": 206,
+   "fn": 410,
+   "sensor_type": "Ручной извещатель",
+   "support": 617,
+   "rows": 16697,
+   "pr_auc": 0.20625733392562798
+  },
+  {
+   "precision": 0.7117460317460318,
+   "recall": 0.7872191011235955,
+   "f1": 0.7475825275091696,
+   "tp": 1121,
+   "fp": 454,
+   "fn": 303,
+   "sensor_type": "Состояние УИР-Р",
+   "support": 1424,
+   "rows": 90010,
+   "pr_auc": 0.6752611435479401
+  },
+  {
+   "precision": 0.7427184466019418,
+   "recall": 0.36465781409601633,
+   "f1": 0.4891527746060745,
+   "tp": 1071,
+   "fp": 371,
+   "fn": 1866,
+   "sensor_type": "Состояние вентилятора",
+   "support": 2937,
+   "rows": 43987,
+   "pr_auc": 0.4727408683269261
+  },
+  {
+   "precision": 0.6971916971916972,
+   "recall": 0.2898477157360406,
+   "f1": 0.40946575833632126,
+   "tp": 571,
+   "fp": 248,
+   "fn": 1399,
+   "sensor_type": "Состояние насоса",
+   "support": 1970,
+   "rows": 19361,
+   "pr_auc": 0.4124255660622764
+  },
+  {
+   "precision": 0.688034188034188,
+   "recall": 0.7931034482758621,
+   "f1": 0.7368421052631579,
+   "tp": 161,
+   "fp": 73,
+   "fn": 42,
+   "sensor_type": "Состояние охраны",
+   "support": 203,
+   "rows": 6712,
+   "pr_auc": 0.7916650595086295
+  },
+  {
+   "precision": 0.716152286551025,
+   "recall": 0.6912372254838008,
+   "f1": 0.7034742199601681,
+   "tp": 3179,
+   "fp": 1260,
+   "fn": 1420,
+   "sensor_type": "Состояние фазы",
+   "support": 4599,
+   "rows": 129619,
+   "pr_auc": 0.7080321453365623
+  },
+  {
+   "precision": 0.8536585365853658,
+   "recall": 1.0,
+   "f1": 0.9210526315789475,
+   "tp": 70,
+   "fp": 12,
+   "fn": 0,
+   "sensor_type": "Стекло",
+   "support": 70,
+   "rows": 4329,
+   "pr_auc": 0.9390458865208289
+  },
+  {
+   "precision": 0.572463768115942,
+   "recall": 0.7926421404682275,
+   "f1": 0.6647966339410939,
+   "tp": 237,
+   "fp": 177,
+   "fn": 62,
+   "sensor_type": "Тепловой датчик",
+   "support": 299,
+   "rows": 48073,
+   "pr_auc": 0.7214829082108133
+  }
+ ],
+ "recall_by_fault_kind": [
+  {
+   "fault_kind": "Неисправен",
+   "support": 5506,
+   "recall": 0.017253904831093354
+  },
+  {
+   "fault_kind": "Отключено устройство",
+   "support": 1314,
+   "recall": 0.0076103500761035
+  },
+  {
+   "fault_kind": "Пропадание связи",
+   "support": 24792,
+   "recall": 0.8925459825750242
+  }
+ ],
+ "precision_at_k": {
+  "20": 0.9633333333333334,
+  "50": 0.8973333333333333,
+  "100": 0.7687777777777778
+ },
+ "median_lead_time_h": 10.689444444444444,
+ "thresholds": [
+  {
+   "threshold": 0.05,
+   "precision": 0.30628347635777226,
+   "recall": 0.8411362773630267,
+   "alerts_per_day": 482.30555555555554,
+   "tp_per_day": 147.72222222222223,
+   "fp_per_day": 334.5833333333333,
+   "is_selected": 0.0
+  },
+  {
+   "threshold": 0.1,
+   "precision": 0.4398887125251913,
+   "recall": 0.7802416803745413,
+   "alerts_per_day": 311.50555555555553,
+   "tp_per_day": 137.02777777777777,
+   "fp_per_day": 174.4777777777778,
+   "is_selected": 0.0
+  },
+  {
+   "threshold": 0.15,
+   "precision": 0.49430867436527776,
+   "recall": 0.7569277489560926,
+   "alerts_per_day": 268.9277777777778,
+   "tp_per_day": 132.93333333333334,
+   "fp_per_day": 135.99444444444444,
+   "is_selected": 0.0
+  },
+  {
+   "threshold": 0.2,
+   "precision": 0.5683000273747605,
+   "recall": 0.7223839048462609,
+   "alerts_per_day": 223.23888888888888,
+   "tp_per_day": 126.86666666666666,
+   "fp_per_day": 96.37222222222222,
+   "is_selected": 0.0
+  },
+  {
+   "threshold": 0.25,
+   "precision": 0.5947184118374977,
+   "recall": 0.7145387827407313,
+   "alerts_per_day": 211.00555555555556,
+   "tp_per_day": 125.4888888888889,
+   "fp_per_day": 85.51666666666667,
+   "is_selected": 0.0
+  },
+  {
+   "threshold": 0.3,
+   "precision": 0.5960116217643951,
+   "recall": 0.7138112109325573,
+   "alerts_per_day": 210.33333333333334,
+   "tp_per_day": 125.36111111111111,
+   "fp_per_day": 84.97222222222223,
+   "is_selected": 0.0
+  },
+  {
+   "threshold": 0.3454,
+   "precision": 0.6202538708327521,
+   "recall": 0.7033088700493484,
+   "alerts_per_day": 199.13888888888889,
+   "tp_per_day": 123.51666666666667,
+   "fp_per_day": 75.62222222222222,
+   "is_selected": true
+  },
+  {
+   "threshold": 0.35,
+   "precision": 0.6348660443339788,
+   "recall": 0.6948943439200304,
+   "alerts_per_day": 192.2277777777778,
+   "tp_per_day": 122.03888888888889,
+   "fp_per_day": 70.18888888888888,
+   "is_selected": 0.0
+  },
+  {
+   "threshold": 0.4,
+   "precision": 0.6710051301539046,
+   "recall": 0.6702834366696191,
+   "alerts_per_day": 175.43333333333334,
+   "tp_per_day": 117.71666666666667,
+   "fp_per_day": 57.71666666666667,
+   "is_selected": 0.0
+  },
+  {
+   "threshold": 0.45,
+   "precision": 0.6710051301539046,
+   "recall": 0.6702834366696191,
+   "alerts_per_day": 175.43333333333334,
+   "tp_per_day": 117.71666666666667,
+   "fp_per_day": 57.71666666666667,
+   "is_selected": 0.0
+  },
+  {
+   "threshold": 0.5,
+   "precision": 0.7210456651224355,
+   "recall": 0.6203656839174997,
+   "alerts_per_day": 151.1,
+   "tp_per_day": 108.95,
+   "fp_per_day": 42.15,
+   "is_selected": 0.0
+  },
+  {
+   "threshold": 0.55,
+   "precision": 0.7424787059467063,
+   "recall": 0.6011324813362015,
+   "alerts_per_day": 142.1888888888889,
+   "tp_per_day": 105.57222222222222,
+   "fp_per_day": 36.61666666666667,
+   "is_selected": 0.0
+  },
+  {
+   "threshold": 0.6,
+   "precision": 0.7957974897757721,
+   "recall": 0.5355244843730229,
+   "alerts_per_day": 118.18333333333334,
+   "tp_per_day": 94.05,
+   "fp_per_day": 24.133333333333333,
+   "is_selected": 0.0
+  },
+  {
+   "threshold": 0.65,
+   "precision": 0.7979203266701486,
+   "recall": 0.5316019233202581,
+   "alerts_per_day": 117.00555555555556,
+   "tp_per_day": 93.36111111111111,
+   "fp_per_day": 23.644444444444446,
+   "is_selected": 0.0
+  },
+  {
+   "threshold": 0.7,
+   "precision": 0.8040992344219401,
+   "recall": 0.5249588763760598,
+   "alerts_per_day": 114.65555555555555,
+   "tp_per_day": 92.19444444444444,
+   "fp_per_day": 22.461111111111112,
+   "is_selected": 0.0
+  },
+  {
+   "threshold": 0.75,
+   "precision": 0.850908656145385,
+   "recall": 0.4502720485891434,
+   "alerts_per_day": 92.93333333333334,
+   "tp_per_day": 79.07777777777778,
+   "fp_per_day": 13.855555555555556,
+   "is_selected": 0.0
+  },
+  {
+   "threshold": 0.8,
+   "precision": 0.866901776384535,
+   "recall": 0.4199038339870935,
+   "alerts_per_day": 85.06666666666666,
+   "tp_per_day": 73.74444444444444,
+   "fp_per_day": 11.322222222222223,
+   "is_selected": 0.0
+  },
+  {
+   "threshold": 0.85,
+   "precision": 0.8912652921550175,
+   "recall": 0.3295583955459952,
+   "alerts_per_day": 64.93888888888888,
+   "tp_per_day": 57.87777777777778,
+   "fp_per_day": 7.061111111111111,
+   "is_selected": 0.0
+  },
+  {
+   "threshold": 0.9,
+   "precision": 0.8915442773963674,
+   "recall": 0.32452866000253067,
+   "alerts_per_day": 63.92777777777778,
+   "tp_per_day": 56.99444444444445,
+   "fp_per_day": 6.933333333333334,
+   "is_selected": 0.0
+  },
+  {
+   "threshold": 0.95,
+   "precision": 0.9367245657568238,
+   "recall": 0.14330001265342276,
+   "alerts_per_day": 26.866666666666667,
+   "tp_per_day": 25.166666666666668,
+   "fp_per_day": 1.7,
+   "is_selected": 0.0
+  }
+ ],
+ "daily": [
+  {
+   "date": "2026-01-01",
+   "predicted": 252,
+   "actual": 200,
+   "true_positive": 152
+  },
+  {
+   "date": "2026-01-02",
+   "predicted": 374,
+   "actual": 347,
+   "true_positive": 320
+  },
+  {
+   "date": "2026-01-03",
+   "predicted": 556,
+   "actual": 495,
+   "true_positive": 450
+  },
+  {
+   "date": "2026-01-04",
+   "predicted": 389,
+   "actual": 453,
+   "true_positive": 360
+  },
+  {
+   "date": "2026-01-05",
+   "predicted": 319,
+   "actual": 315,
+   "true_positive": 288
+  },
+  {
+   "date": "2026-01-06",
+   "predicted": 415,
+   "actual": 292,
+   "true_positive": 268
+  },
+  {
+   "date": "2026-01-07",
+   "predicted": 174,
+   "actual": 178,
+   "true_positive": 156
+  },
+  {
+   "date": "2026-01-08",
+   "predicted": 237,
+   "actual": 228,
+   "true_positive": 208
+  },
+  {
+   "date": "2026-01-09",
+   "predicted": 255,
+   "actual": 204,
+   "true_positive": 178
+  },
+  {
+   "date": "2026-01-10",
+   "predicted": 147,
+   "actual": 190,
+   "true_positive": 133
+  },
+  {
+   "date": "2026-01-11",
+   "predicted": 272,
+   "actual": 171,
+   "true_positive": 128
+  },
+  {
+   "date": "2026-01-12",
+   "predicted": 177,
+   "actual": 195,
+   "true_positive": 148
+  },
+  {
+   "date": "2026-01-13",
+   "predicted": 331,
+   "actual": 185,
+   "true_positive": 176
+  },
+  {
+   "date": "2026-01-14",
+   "predicted": 375,
+   "actual": 120,
+   "true_positive": 86
+  },
+  {
+   "date": "2026-01-15",
+   "predicted": 180,
+   "actual": 130,
+   "true_positive": 85
+  },
+  {
+   "date": "2026-01-16",
+   "predicted": 112,
+   "actual": 132,
+   "true_positive": 93
+  },
+  {
+   "date": "2026-01-17",
+   "predicted": 358,
+   "actual": 136,
+   "true_positive": 121
+  },
+  {
+   "date": "2026-01-18",
+   "predicted": 220,
+   "actual": 245,
+   "true_positive": 183
+  },
+  {
+   "date": "2026-01-19",
+   "predicted": 451,
+   "actual": 197,
+   "true_positive": 192
+  },
+  {
+   "date": "2026-01-20",
+   "predicted": 93,
+   "actual": 92,
+   "true_positive": 69
+  },
+  {
+   "date": "2026-01-21",
+   "predicted": 305,
+   "actual": 129,
+   "true_positive": 77
+  },
+  {
+   "date": "2026-01-22",
+   "predicted": 65,
+   "actual": 90,
+   "true_positive": 44
+  },
+  {
+   "date": "2026-01-23",
+   "predicted": 55,
+   "actual": 93,
+   "true_positive": 36
+  },
+  {
+   "date": "2026-01-24",
+   "predicted": 276,
+   "actual": 166,
+   "true_positive": 126
+  },
+  {
+   "date": "2026-01-25",
+   "predicted": 60,
+   "actual": 63,
+   "true_positive": 52
+  },
+  {
+   "date": "2026-01-26",
+   "predicted": 55,
+   "actual": 98,
+   "true_positive": 35
+  },
+  {
+   "date": "2026-01-27",
+   "predicted": 52,
+   "actual": 128,
+   "true_positive": 45
+  },
+  {
+   "date": "2026-01-28",
+   "predicted": 119,
+   "actual": 118,
+   "true_positive": 38
+  },
+  {
+   "date": "2026-01-29",
+   "predicted": 343,
+   "actual": 115,
+   "true_positive": 80
+  },
+  {
+   "date": "2026-01-30",
+   "predicted": 94,
+   "actual": 100,
+   "true_positive": 30
+  },
+  {
+   "date": "2026-01-31",
+   "predicted": 54,
+   "actual": 57,
+   "true_positive": 41
+  },
+  {
+   "date": "2026-02-01",
+   "predicted": 207,
+   "actual": 65,
+   "true_positive": 56
+  },
+  {
+   "date": "2026-02-02",
+   "predicted": 76,
+   "actual": 90,
+   "true_positive": 62
+  },
+  {
+   "date": "2026-02-03",
+   "predicted": 72,
+   "actual": 202,
+   "true_positive": 63
+  },
+  {
+   "date": "2026-02-04",
+   "predicted": 64,
+   "actual": 109,
+   "true_positive": 42
+  },
+  {
+   "date": "2026-02-05",
+   "predicted": 81,
+   "actual": 81,
+   "true_positive": 57
+  },
+  {
+   "date": "2026-02-06",
+   "predicted": 637,
+   "actual": 81,
+   "true_positive": 53
+  },
+  {
+   "date": "2026-02-07",
+   "predicted": 79,
+   "actual": 121,
+   "true_positive": 59
+  },
+  {
+   "date": "2026-02-08",
+   "predicted": 124,
+   "actual": 78,
+   "true_positive": 65
+  },
+  {
+   "date": "2026-02-09",
+   "predicted": 123,
+   "actual": 130,
+   "true_positive": 73
+  },
+  {
+   "date": "2026-02-10",
+   "predicted": 188,
+   "actual": 224,
+   "true_positive": 134
+  },
+  {
+   "date": "2026-02-11",
+   "predicted": 115,
+   "actual": 87,
+   "true_positive": 58
+  },
+  {
+   "date": "2026-02-12",
+   "predicted": 190,
+   "actual": 170,
+   "true_positive": 139
+  },
+  {
+   "date": "2026-02-13",
+   "predicted": 58,
+   "actual": 99,
+   "true_positive": 39
+  },
+  {
+   "date": "2026-02-14",
+   "predicted": 150,
+   "actual": 127,
+   "true_positive": 89
+  },
+  {
+   "date": "2026-02-15",
+   "predicted": 90,
+   "actual": 87,
+   "true_positive": 76
+  },
+  {
+   "date": "2026-02-16",
+   "predicted": 188,
+   "actual": 180,
+   "true_positive": 123
+  },
+  {
+   "date": "2026-02-17",
+   "predicted": 251,
+   "actual": 171,
+   "true_positive": 146
+  },
+  {
+   "date": "2026-02-18",
+   "predicted": 124,
+   "actual": 120,
+   "true_positive": 77
+  },
+  {
+   "date": "2026-02-19",
+   "predicted": 116,
+   "actual": 106,
+   "true_positive": 96
+  },
+  {
+   "date": "2026-02-20",
+   "predicted": 147,
+   "actual": 97,
+   "true_positive": 73
+  },
+  {
+   "date": "2026-02-21",
+   "predicted": 155,
+   "actual": 156,
+   "true_positive": 130
+  },
+  {
+   "date": "2026-02-22",
+   "predicted": 618,
+   "actual": 372,
+   "true_positive": 368
+  },
+  {
+   "date": "2026-02-23",
+   "predicted": 272,
+   "actual": 309,
+   "true_positive": 248
+  },
+  {
+   "date": "2026-02-24",
+   "predicted": 749,
+   "actual": 453,
+   "true_positive": 390
+  },
+  {
+   "date": "2026-02-25",
+   "predicted": 745,
+   "actual": 221,
+   "true_positive": 202
+  },
+  {
+   "date": "2026-02-26",
+   "predicted": 258,
+   "actual": 246,
+   "true_positive": 170
+  },
+  {
+   "date": "2026-02-27",
+   "predicted": 142,
+   "actual": 120,
+   "true_positive": 104
+  },
+  {
+   "date": "2026-02-28",
+   "predicted": 435,
+   "actual": 189,
+   "true_positive": 184
+  },
+  {
+   "date": "2026-03-01",
+   "predicted": 178,
+   "actual": 152,
+   "true_positive": 120
+  },
+  {
+   "date": "2026-03-02",
+   "predicted": 315,
+   "actual": 263,
+   "true_positive": 235
+  },
+  {
+   "date": "2026-03-03",
+   "predicted": 156,
+   "actual": 150,
+   "true_positive": 130
+  },
+  {
+   "date": "2026-03-04",
+   "predicted": 200,
+   "actual": 186,
+   "true_positive": 168
+  },
+  {
+   "date": "2026-03-05",
+   "predicted": 234,
+   "actual": 307,
+   "true_positive": 218
+  },
+  {
+   "date": "2026-03-06",
+   "predicted": 406,
+   "actual": 101,
+   "true_positive": 68
+  },
+  {
+   "date": "2026-03-07",
+   "predicted": 288,
+   "actual": 206,
+   "true_positive": 129
+  },
+  {
+   "date": "2026-03-08",
+   "predicted": 156,
+   "actual": 190,
+   "true_positive": 147
+  },
+  {
+   "date": "2026-03-09",
+   "predicted": 229,
+   "actual": 197,
+   "true_positive": 170
+  },
+  {
+   "date": "2026-03-10",
+   "predicted": 260,
+   "actual": 233,
+   "true_positive": 193
+  },
+  {
+   "date": "2026-03-11",
+   "predicted": 140,
+   "actual": 133,
+   "true_positive": 87
+  },
+  {
+   "date": "2026-03-12",
+   "predicted": 249,
+   "actual": 233,
+   "true_positive": 146
+  },
+  {
+   "date": "2026-03-13",
+   "predicted": 139,
+   "actual": 123,
+   "true_positive": 95
+  },
+  {
+   "date": "2026-03-14",
+   "predicted": 93,
+   "actual": 105,
+   "true_positive": 81
+  },
+  {
+   "date": "2026-03-15",
+   "predicted": 834,
+   "actual": 128,
+   "true_positive": 100
+  },
+  {
+   "date": "2026-03-16",
+   "predicted": 114,
+   "actual": 128,
+   "true_positive": 72
+  },
+  {
+   "date": "2026-03-17",
+   "predicted": 90,
+   "actual": 114,
+   "true_positive": 71
+  },
+  {
+   "date": "2026-03-18",
+   "predicted": 105,
+   "actual": 119,
+   "true_positive": 88
+  },
+  {
+   "date": "2026-03-19",
+   "predicted": 596,
+   "actual": 242,
+   "true_positive": 135
+  },
+  {
+   "date": "2026-03-20",
+   "predicted": 143,
+   "actual": 103,
+   "true_positive": 92
+  },
+  {
+   "date": "2026-03-21",
+   "predicted": 59,
+   "actual": 75,
+   "true_positive": 55
+  },
+  {
+   "date": "2026-03-22",
+   "predicted": 84,
+   "actual": 88,
+   "true_positive": 73
+  },
+  {
+   "date": "2026-03-23",
+   "predicted": 96,
+   "actual": 88,
+   "true_positive": 77
+  },
+  {
+   "date": "2026-03-24",
+   "predicted": 105,
+   "actual": 117,
+   "true_positive": 73
+  },
+  {
+   "date": "2026-03-25",
+   "predicted": 116,
+   "actual": 161,
+   "true_positive": 79
+  },
+  {
+   "date": "2026-03-26",
+   "predicted": 109,
+   "actual": 127,
+   "true_positive": 86
+  },
+  {
+   "date": "2026-03-27",
+   "predicted": 149,
+   "actual": 241,
+   "true_positive": 78
+  },
+  {
+   "date": "2026-03-28",
+   "predicted": 405,
+   "actual": 111,
+   "true_positive": 83
+  },
+  {
+   "date": "2026-03-29",
+   "predicted": 112,
+   "actual": 133,
+   "true_positive": 84
+  },
+  {
+   "date": "2026-03-30",
+   "predicted": 91,
+   "actual": 105,
+   "true_positive": 70
+  },
+  {
+   "date": "2026-03-31",
+   "predicted": 170,
+   "actual": 163,
+   "true_positive": 127
+  },
+  {
+   "date": "2026-04-01",
+   "predicted": 115,
+   "actual": 157,
+   "true_positive": 78
+  },
+  {
+   "date": "2026-04-02",
+   "predicted": 117,
+   "actual": 110,
+   "true_positive": 75
+  },
+  {
+   "date": "2026-04-03",
+   "predicted": 105,
+   "actual": 131,
+   "true_positive": 65
+  },
+  {
+   "date": "2026-04-04",
+   "predicted": 102,
+   "actual": 120,
+   "true_positive": 86
+  },
+  {
+   "date": "2026-04-05",
+   "predicted": 100,
+   "actual": 126,
+   "true_positive": 81
+  },
+  {
+   "date": "2026-04-06",
+   "predicted": 151,
+   "actual": 150,
+   "true_positive": 105
+  },
+  {
+   "date": "2026-04-07",
+   "predicted": 151,
+   "actual": 233,
+   "true_positive": 112
+  },
+  {
+   "date": "2026-04-08",
+   "predicted": 89,
+   "actual": 153,
+   "true_positive": 69
+  },
+  {
+   "date": "2026-04-09",
+   "predicted": 58,
+   "actual": 109,
+   "true_positive": 30
+  },
+  {
+   "date": "2026-04-10",
+   "predicted": 53,
+   "actual": 107,
+   "true_positive": 42
+  },
+  {
+   "date": "2026-04-11",
+   "predicted": 61,
+   "actual": 57,
+   "true_positive": 45
+  },
+  {
+   "date": "2026-04-12",
+   "predicted": 140,
+   "actual": 113,
+   "true_positive": 92
+  },
+  {
+   "date": "2026-04-13",
+   "predicted": 435,
+   "actual": 281,
+   "true_positive": 157
+  },
+  {
+   "date": "2026-04-14",
+   "predicted": 160,
+   "actual": 348,
+   "true_positive": 113
+  },
+  {
+   "date": "2026-04-15",
+   "predicted": 137,
+   "actual": 125,
+   "true_positive": 103
+  },
+  {
+   "date": "2026-04-16",
+   "predicted": 115,
+   "actual": 111,
+   "true_positive": 69
+  },
+  {
+   "date": "2026-04-17",
+   "predicted": 113,
+   "actual": 695,
+   "true_positive": 92
+  },
+  {
+   "date": "2026-04-18",
+   "predicted": 223,
+   "actual": 134,
+   "true_positive": 115
+  },
+  {
+   "date": "2026-04-19",
+   "predicted": 290,
+   "actual": 143,
+   "true_positive": 136
+  },
+  {
+   "date": "2026-04-20",
+   "predicted": 280,
+   "actual": 295,
+   "true_positive": 226
+  },
+  {
+   "date": "2026-04-21",
+   "predicted": 247,
+   "actual": 301,
+   "true_positive": 162
+  },
+  {
+   "date": "2026-04-22",
+   "predicted": 284,
+   "actual": 182,
+   "true_positive": 108
+  },
+  {
+   "date": "2026-04-23",
+   "predicted": 106,
+   "actual": 144,
+   "true_positive": 56
+  },
+  {
+   "date": "2026-04-24",
+   "predicted": 66,
+   "actual": 114,
+   "true_positive": 42
+  },
+  {
+   "date": "2026-04-25",
+   "predicted": 90,
+   "actual": 112,
+   "true_positive": 77
+  },
+  {
+   "date": "2026-04-26",
+   "predicted": 124,
+   "actual": 172,
+   "true_positive": 112
+  },
+  {
+   "date": "2026-04-27",
+   "predicted": 367,
+   "actual": 382,
+   "true_positive": 299
+  },
+  {
+   "date": "2026-04-28",
+   "predicted": 256,
+   "actual": 245,
+   "true_positive": 205
+  },
+  {
+   "date": "2026-04-29",
+   "predicted": 437,
+   "actual": 310,
+   "true_positive": 275
+  },
+  {
+   "date": "2026-04-30",
+   "predicted": 190,
+   "actual": 214,
+   "true_positive": 163
+  },
+  {
+   "date": "2026-05-01",
+   "predicted": 311,
+   "actual": 249,
+   "true_positive": 186
+  },
+  {
+   "date": "2026-05-02",
+   "predicted": 140,
+   "actual": 180,
+   "true_positive": 107
+  },
+  {
+   "date": "2026-05-03",
+   "predicted": 244,
+   "actual": 249,
+   "true_positive": 202
+  },
+  {
+   "date": "2026-05-04",
+   "predicted": 236,
+   "actual": 180,
+   "true_positive": 152
+  },
+  {
+   "date": "2026-05-05",
+   "predicted": 462,
+   "actual": 228,
+   "true_positive": 172
+  },
+  {
+   "date": "2026-05-06",
+   "predicted": 195,
+   "actual": 224,
+   "true_positive": 157
+  },
+  {
+   "date": "2026-05-07",
+   "predicted": 362,
+   "actual": 353,
+   "true_positive": 309
+  },
+  {
+   "date": "2026-05-08",
+   "predicted": 114,
+   "actual": 110,
+   "true_positive": 80
+  },
+  {
+   "date": "2026-05-09",
+   "predicted": 179,
+   "actual": 128,
+   "true_positive": 112
+  },
+  {
+   "date": "2026-05-10",
+   "predicted": 263,
+   "actual": 236,
+   "true_positive": 187
+  },
+  {
+   "date": "2026-05-11",
+   "predicted": 268,
+   "actual": 251,
+   "true_positive": 211
+  },
+  {
+   "date": "2026-05-12",
+   "predicted": 285,
+   "actual": 204,
+   "true_positive": 180
+  },
+  {
+   "date": "2026-05-13",
+   "predicted": 286,
+   "actual": 317,
+   "true_positive": 254
+  },
+  {
+   "date": "2026-05-14",
+   "predicted": 140,
+   "actual": 148,
+   "true_positive": 108
+  },
+  {
+   "date": "2026-05-15",
+   "predicted": 121,
+   "actual": 130,
+   "true_positive": 102
+  },
+  {
+   "date": "2026-05-16",
+   "predicted": 113,
+   "actual": 145,
+   "true_positive": 88
+  },
+  {
+   "date": "2026-05-17",
+   "predicted": 123,
+   "actual": 123,
+   "true_positive": 104
+  },
+  {
+   "date": "2026-05-18",
+   "predicted": 256,
+   "actual": 266,
+   "true_positive": 204
+  },
+  {
+   "date": "2026-05-19",
+   "predicted": 159,
+   "actual": 291,
+   "true_positive": 111
+  },
+  {
+   "date": "2026-05-20",
+   "predicted": 162,
+   "actual": 165,
+   "true_positive": 139
+  },
+  {
+   "date": "2026-05-21",
+   "predicted": 163,
+   "actual": 178,
+   "true_positive": 117
+  },
+  {
+   "date": "2026-05-22",
+   "predicted": 242,
+   "actual": 196,
+   "true_positive": 106
+  },
+  {
+   "date": "2026-05-23",
+   "predicted": 137,
+   "actual": 163,
+   "true_positive": 123
+  },
+  {
+   "date": "2026-05-24",
+   "predicted": 103,
+   "actual": 121,
+   "true_positive": 88
+  },
+  {
+   "date": "2026-05-25",
+   "predicted": 186,
+   "actual": 175,
+   "true_positive": 138
+  },
+  {
+   "date": "2026-05-26",
+   "predicted": 223,
+   "actual": 250,
+   "true_positive": 158
+  },
+  {
+   "date": "2026-05-27",
+   "predicted": 120,
+   "actual": 154,
+   "true_positive": 77
+  },
+  {
+   "date": "2026-05-28",
+   "predicted": 77,
+   "actual": 147,
+   "true_positive": 45
+  },
+  {
+   "date": "2026-05-29",
+   "predicted": 157,
+   "actual": 139,
+   "true_positive": 80
+  },
+  {
+   "date": "2026-05-30",
+   "predicted": 87,
+   "actual": 100,
+   "true_positive": 66
+  },
+  {
+   "date": "2026-05-31",
+   "predicted": 86,
+   "actual": 88,
+   "true_positive": 63
+  },
+  {
+   "date": "2026-06-01",
+   "predicted": 121,
+   "actual": 154,
+   "true_positive": 101
+  },
+  {
+   "date": "2026-06-02",
+   "predicted": 332,
+   "actual": 299,
+   "true_positive": 244
+  },
+  {
+   "date": "2026-06-03",
+   "predicted": 333,
+   "actual": 360,
+   "true_positive": 294
+  },
+  {
+   "date": "2026-06-04",
+   "predicted": 147,
+   "actual": 165,
+   "true_positive": 95
+  },
+  {
+   "date": "2026-06-05",
+   "predicted": 120,
+   "actual": 156,
+   "true_positive": 98
+  },
+  {
+   "date": "2026-06-06",
+   "predicted": 174,
+   "actual": 178,
+   "true_positive": 157
+  },
+  {
+   "date": "2026-06-07",
+   "predicted": 145,
+   "actual": 121,
+   "true_positive": 109
+  },
+  {
+   "date": "2026-06-08",
+   "predicted": 80,
+   "actual": 89,
+   "true_positive": 61
+  },
+  {
+   "date": "2026-06-09",
+   "predicted": 184,
+   "actual": 229,
+   "true_positive": 154
+  },
+  {
+   "date": "2026-06-10",
+   "predicted": 116,
+   "actual": 99,
+   "true_positive": 71
+  },
+  {
+   "date": "2026-06-11",
+   "predicted": 119,
+   "actual": 242,
+   "true_positive": 95
+  },
+  {
+   "date": "2026-06-12",
+   "predicted": 113,
+   "actual": 114,
+   "true_positive": 81
+  },
+  {
+   "date": "2026-06-13",
+   "predicted": 107,
+   "actual": 223,
+   "true_positive": 92
+  },
+  {
+   "date": "2026-06-14",
+   "predicted": 150,
+   "actual": 129,
+   "true_positive": 98
+  },
+  {
+   "date": "2026-06-15",
+   "predicted": 244,
+   "actual": 266,
+   "true_positive": 127
+  },
+  {
+   "date": "2026-06-16",
+   "predicted": 206,
+   "actual": 181,
+   "true_positive": 147
+  },
+  {
+   "date": "2026-06-17",
+   "predicted": 197,
+   "actual": 109,
+   "true_positive": 88
+  },
+  {
+   "date": "2026-06-18",
+   "predicted": 74,
+   "actual": 85,
+   "true_positive": 60
+  },
+  {
+   "date": "2026-06-19",
+   "predicted": 204,
+   "actual": 153,
+   "true_positive": 112
+  },
+  {
+   "date": "2026-06-20",
+   "predicted": 108,
+   "actual": 157,
+   "true_positive": 98
+  },
+  {
+   "date": "2026-06-21",
+   "predicted": 129,
+   "actual": 124,
+   "true_positive": 112
+  },
+  {
+   "date": "2026-06-22",
+   "predicted": 199,
+   "actual": 175,
+   "true_positive": 127
+  },
+  {
+   "date": "2026-06-23",
+   "predicted": 232,
+   "actual": 220,
+   "true_positive": 181
+  },
+  {
+   "date": "2026-06-24",
+   "predicted": 148,
+   "actual": 157,
+   "true_positive": 100
+  },
+  {
+   "date": "2026-06-25",
+   "predicted": 81,
+   "actual": 133,
+   "true_positive": 63
+  },
+  {
+   "date": "2026-06-26",
+   "predicted": 88,
+   "actual": 79,
+   "true_positive": 62
+  },
+  {
+   "date": "2026-06-27",
+   "predicted": 95,
+   "actual": 84,
+   "true_positive": 73
+  },
+  {
+   "date": "2026-06-28",
+   "predicted": 123,
+   "actual": 145,
+   "true_positive": 106
+  },
+  {
+   "date": "2026-06-29",
+   "predicted": 274,
+   "actual": 249,
+   "true_positive": 207
+  }
+ ],
+ "valid": {
+  "model": {
+   "precision": 0.7288776347230643,
+   "recall": 0.7023506770224758,
+   "f1": 0.7153683252533385,
+   "tp": 20437,
+   "fp": 7602,
+   "fn": 8661,
+   "pr_auc": 0.7550296328037845,
+   "pr_auc_raw": 0.7626473809600884
+  },
+  "baseline": {
+   "precision": 0.061823340551034126,
+   "recall": 0.22764451165028524,
+   "f1": 0.0972387369533624,
+   "tp": 6624,
+   "fp": 100520,
+   "fn": 22474
+  },
+  "rows": 1383362,
+  "positives": 29098
+ },
+ "opened_at": "2026-09-25T01:04:22"
+}

@@ -1,0 +1,271 @@
+{
+ "python": "3.14.0",
+ "packages": [
+  {
+   "name": "cloudpickle",
+   "version": "3.1.2",
+   "license": "BSD-3-Clause",
+   "summary": "Pickler class to extend the standard pickle.Pickler functionality",
+   "direct": false
+  },
+  {
+   "name": "colorama",
+   "version": "0.4.6",
+   "license": "BSD License",
+   "summary": "Cross-platform colored terminal text.",
+   "direct": false
+  },
+  {
+   "name": "contourpy",
+   "version": "1.4.0",
+   "license": "BSD-3-Clause",
+   "summary": "Python library for calculating contours of 2D quadrilateral grids",
+   "direct": false
+  },
+  {
+   "name": "cycler",
+   "version": "0.12.1",
+   "license": "BSD License",
+   "summary": "Composable style cycles",
+   "direct": false
+  },
+  {
+   "name": "duckdb",
+   "version": "1.5.5",
+   "license": "MIT License",
+   "summary": "DuckDB in-process database",
+   "direct": true
+  },
+  {
+   "name": "et_xmlfile",
+   "version": "2.0.0",
+   "license": "MIT",
+   "summary": "An implementation of lxml.xmlfile for the standard library",
+   "direct": false
+  },
+  {
+   "name": "fonttools",
+   "version": "4.66.0",
+   "license": "MIT",
+   "summary": "Tools to manipulate font files",
+   "direct": false
+  },
+  {
+   "name": "iniconfig",
+   "version": "2.3.0",
+   "license": "MIT",
+   "summary": "brain-dead simple config-ini parsing",
+   "direct": false
+  },
+  {
+   "name": "joblib",
+   "version": "1.6.0",
+   "license": "BSD-3-Clause",
+   "summary": "Lightweight pipelining with Python functions",
+   "direct": false
+  },
+  {
+   "name": "kiwisolver",
+   "version": "1.5.1",
+   "license": "BSD License",
+   "summary": "A fast implementation of the Cassowary constraint solver",
+   "direct": false
+  },
+  {
+   "name": "lightgbm",
+   "version": "4.7.0",
+   "license": "MIT",
+   "summary": "LightGBM Python-package",
+   "direct": true
+  },
+  {
+   "name": "llvmlite",
+   "version": "0.49.0",
+   "license": "BSD-2-Clause AND Apache-2.0 WITH LLVM-exception",
+   "summary": "lightweight wrapper around basic LLVM functionality",
+   "direct": false
+  },
+  {
+   "name": "matplotlib",
+   "version": "3.11.2",
+   "license": "Python Software Foundation License",
+   "summary": "Python plotting package",
+   "direct": true
+  },
+  {
+   "name": "narwhals",
+   "version": "2.26.0",
+   "license": "MIT",
+   "summary": "Extremely lightweight compatibility layer between dataframe libraries",
+   "direct": false
+  },
+  {
+   "name": "numba",
+   "version": "0.67.0",
+   "license": "BSD",
+   "summary": "compiling Python code using LLVM",
+   "direct": false
+  },
+  {
+   "name": "numpy",
+   "version": "2.5.3",
+   "license": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
+   "summary": "Fundamental package for array computing in Python",
+   "direct": true
+  },
+  {
+   "name": "openpyxl",
+   "version": "3.1.5",
+   "license": "MIT",
+   "summary": "A Python library to read/write Excel 2010 xlsx/xlsm files",
+   "direct": true
+  },
+  {
+   "name": "packaging",
+   "version": "26.3",
+   "license": "Apache-2.0 OR BSD-2-Clause",
+   "summary": "Core utilities for Python packages",
+   "direct": false
+  },
+  {
+   "name": "pandas",
+   "version": "3.0.6",
+   "license": "BSD License",
+   "summary": "Powerful data structures for data analysis, time series, and statistics",
+   "direct": true
+  },
+  {
+   "name": "pillow",
+   "version": "12.3.0",
+   "license": "MIT-CMU",
+   "summary": "Python Imaging Library (fork)",
+   "direct": false
+  },
+  {
+   "name": "pluggy",
+   "version": "1.6.0",
+   "license": "MIT",
+   "summary": "plugin and hook calling mechanisms for python",
+   "direct": false
+  },
+  {
+   "name": "polars",
+   "version": "1.44.2",
+   "license": "MIT License",
+   "summary": "Blazingly fast DataFrame library",
+   "direct": true
+  },
+  {
+   "name": "polars-runtime-32",
+   "version": "1.44.2",
+   "license": "MIT",
+   "summary": "Blazingly fast DataFrame library",
+   "direct": false
+  },
+  {
+   "name": "psycopg",
+   "version": "3.3.6",
+   "license": "LGPL-3.0-only",
+   "summary": "PostgreSQL database adapter for Python",
+   "direct": true
+  },
+  {
+   "name": "psycopg-binary",
+   "version": "3.3.6",
+   "license": "LGPL-3.0-only",
+   "summary": "PostgreSQL database adapter for Python -- C optimisation distribution",
+   "direct": true
+  },
+  {
+   "name": "pyarrow",
+   "version": "25.0.1",
+   "license": "Apache-2.0",
+   "summary": "Python library for Apache Arrow",
+   "direct": true
+  },
+  {
+   "name": "Pygments",
+   "version": "2.21.0",
+   "license": "BSD-2-Clause",
+   "summary": "Pygments is a syntax highlighting package written in Python.",
+   "direct": false
+  },
+  {
+   "name": "pyparsing",
+   "version": "3.3.3",
+   "license": "MIT",
+   "summary": "pyparsing - Classes and methods to define and execute parsing grammars",
+   "direct": false
+  },
+  {
+   "name": "pytest",
+   "version": "9.1.1",
+   "license": "MIT",
+   "summary": "pytest: simple powerful testing with Python",
+   "direct": false
+  },
+  {
+   "name": "python-dateutil",
+   "version": "2.9.0.post0",
+   "license": "Dual License",
+   "summary": "Extensions to the standard Python datetime module",
+   "direct": false
+  },
+  {
+   "name": "scikit-learn",
+   "version": "1.9.1",
+   "license": "BSD-3-Clause",
+   "summary": "A set of python modules for machine learning and data mining",
+   "direct": true
+  },
+  {
+   "name": "scipy",
+   "version": "1.18.1",
+   "license": "BSD License",
+   "summary": "Fundamental algorithms for scientific computing in Python",
+   "direct": true
+  },
+  {
+   "name": "shap",
+   "version": "0.52.0",
+   "license": "MIT License",
+   "summary": "A unified approach to explain the output of any machine learning model.",
+   "direct": true
+  },
+  {
+   "name": "six",
+   "version": "1.17.0",
+   "license": "MIT",
+   "summary": "Python 2 and 3 compatibility utilities",
+   "direct": false
+  },
+  {
+   "name": "slicer",
+   "version": "0.0.8",
+   "license": "MIT License",
+   "summary": "A small package for big slicing.",
+   "direct": false
+  },
+  {
+   "name": "threadpoolctl",
+   "version": "3.7.0",
+   "license": "BSD-3-Clause",
+   "summary": "threadpoolctl",
+   "direct": false
+  },
+  {
+   "name": "tqdm",
+   "version": "4.70.1",
+   "license": "MPL-2.0 AND MIT",
+   "summary": "Fast, Extensible Progress Meter",
+   "direct": false
+  },
+  {
+   "name": "tzdata",
+   "version": "2026.4",
+   "license": "Apache-2.0",
+   "summary": "Provider of IANA time zone data",
+   "direct": false
+  }
+ ]
+}

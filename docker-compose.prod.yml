@@ -1,0 +1,75 @@
+# Production-оверлей для VPS. Запуск:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# Наружу смотрят только 80 и 443 (Caddy с TLS). API, БД и Nginx фронтенда — только внутри docker-сети.
+# Все обязательные значения берутся из .env (docs/DEPLOY_VPS.md); без них compose не стартует.
+services:
+  db:
+    ports: !reset []
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Задайте POSTGRES_PASSWORD в .env (openssl rand -hex 24)}
+
+  api:
+    ports: !reset []
+    environment:
+      APP_ENV: production
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-collector}:${POSTGRES_PASSWORD:?Задайте POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-collector}
+      JWT_SECRET: ${JWT_SECRET:?Задайте JWT_SECRET в .env (openssl rand -hex 32)}
+      JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-720}
+      CORS_ORIGINS: https://${DOMAIN:?Задайте DOMAIN в .env}
+      # Демо-данные на сервере не засеваем: данные загружаются из копии БД или ETL (docs/DEPLOY_VPS.md)
+      SEED_ON_START: ${SEED_ON_START:-false}
+      DOCS_ENABLED: ${DOCS_ENABLED:-false}
+      # Симуляция на сервере по умолчанию выключена; для показа жюри — SIM_ENABLED=true в .env (docs/DEPLOY_VPS.md)
+      SIM_ENABLED: ${SIM_ENABLED:-false}
+
+  frontend:
+    ports: !reset []
+    environment:
+      USE_MOCKS: "false"
+
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    depends_on:
+      frontend:
+        condition: service_healthy
+    environment:
+      DOMAIN: ${DOMAIN:?Задайте DOMAIN в .env}
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+      - "${HTTPS_PORT:-443}:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    security_opt:
+      - no-new-privileges:true
+
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    # Ждём API: к этому моменту миграции применены, и первая копия при старте не будет пустой
+    depends_on:
+      db:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER:-collector}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Задайте POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB:-collector}
+      BACKUP_INTERVAL_HOURS: ${BACKUP_INTERVAL_HOURS:-24}
+      BACKUP_KEEP: ${BACKUP_KEEP:-14}
+      TZ: Europe/Moscow
+    entrypoint: ["/bin/sh", "/backup.sh"]
+    volumes:
+      - ./deploy/backup.sh:/backup.sh:ro
+      - ${BACKUP_DIR:-./backups}:/backups
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  caddy_data:
+  caddy_config:

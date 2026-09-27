@@ -1,0 +1,45 @@
+[2026-09-25 16:21:18,991] 764516df10a9/INFO/locust.main: Starting Locust 2.43.1
+[2026-09-25 16:21:19,010] 764516df10a9/INFO/locust.main: Run time limit set to 240 seconds
+[2026-09-25 16:21:19,023] 764516df10a9/INFO/locust.runners: Ramping to 40 users at a rate of 4.00 per second
+[2026-09-25 16:21:28,095] 764516df10a9/INFO/locust.runners: All users spawned: {"Dispatcher": 40} (40 total users)
+[2026-09-25 16:25:18,712] 764516df10a9/INFO/locust.main: --run-time limit reached, shutting down
+[2026-09-25 16:25:18,751] 764516df10a9/INFO/locust.main: Shutting down (exit code 0)
+Type     Name                                                                          # reqs      # fails |    Avg     Min     Max    Med |   req/s  failures/s
+--------|----------------------------------------------------------------------------|-------|-------------|-------|-------|-------|-------|--------|-----------
+GET      GET /api/channels/{id}                                                           810     0(0.00%) |    450      33    1132    450 |    3.38        0.00
+GET      GET /api/channels/{id}/history                                                   808     0(0.00%) |    428      33    2033    380 |    3.37        0.00
+GET      GET /api/dashboard/summary                                                       792     0(0.00%) |    378      22    1052    380 |    3.30        0.00
+GET      GET /api/journal (фильтры)                                                       703     0(0.00%) |   1121     281    2213   1100 |    2.93        0.00
+GET      GET /api/maintenance/plan                                                        106     0(0.00%) |    304      37     781    280 |    0.44        0.00
+GET      GET /api/notifications                                                           791     0(0.00%) |    512      47    1237    500 |    3.30        0.00
+GET      GET /api/notifications/stream (до snapshot)                                      182     0(0.00%) |    686      92    1281    680 |    0.76        0.00
+GET      GET /api/objects                                                                 354     0(0.00%) |    274      22     911    260 |    1.48        0.00
+GET      GET /api/predictions (топ-20)                                                    791     0(0.00%) |    370      30    1026    370 |    3.30        0.00
+GET      GET /api/predictions/{id}/recommendation                                         807     0(0.00%) |    530      33    1233    530 |    3.37        0.00
+GET      GET /api/work-orders                                                             204     0(0.00%) |    271      13     694    260 |    0.85        0.00
+POST     POST /api/auth/login                                                              55     0(0.00%) |    126       3     516    100 |    0.23        0.00
+POST     POST /api/notifications/ticket                                                   183     0(0.00%) |    190      22     572    170 |    0.76        0.00
+SSE      snapshot получен за                                                              182     0(0.00%) |    686      92    1282    680 |    0.76        0.00
+--------|----------------------------------------------------------------------------|-------|-------------|-------|-------|-------|-------|--------|-----------
+         Aggregated                                                                      6768     0(0.00%) |    502       3    2213    440 |   28.23        0.00
+
+Response time percentiles (approximated)
+Type     Name                                                                                  50%    66%    75%    80%    90%    95%    98%    99%  99.9% 99.99%   100% # reqs
+--------|--------------------------------------------------------------------------------|--------|------|------|------|------|------|------|------|------|------|------|------
+GET      GET /api/channels/{id}                                                                450    530    570    610    690    750    850    950   1100   1100   1100    810
+GET      GET /api/channels/{id}/history                                                        380    450    510    560    730    960   1300   1500   2000   2000   2000    808
+GET      GET /api/dashboard/summary                                                            380    450    500    530    610    680    800    880   1100   1100   1100    792
+GET      GET /api/journal (фильтры)                                                           1100   1300   1400   1400   1600   1700   1900   2000   2200   2200   2200    703
+GET      GET /api/maintenance/plan                                                             300    340    400    420    500    590    750    780    780    780    780    106
+GET      GET /api/notifications                                                                500    610    660    700    840    920   1000   1100   1200   1200   1200    791
+GET      GET /api/notifications/stream (до snapshot)                                           690    790    860    900   1000   1100   1100   1200   1300   1300   1300    182
+GET      GET /api/objects                                                                      260    310    350    370    450    550    620    690    910    910    910    354
+GET      GET /api/predictions (топ-20)                                                         370    440    490    520    630    700    770    880   1000   1000   1000    791
+GET      GET /api/predictions/{id}/recommendation                                              530    620    670    710    810    900    990   1100   1200   1200   1200    807
+GET      GET /api/work-orders                                                                  260    320    360    380    480    500    550    560    690    690    690    204
+POST     POST /api/auth/login                                                                  100    110    170    190    290    410    480    520    520    520    520     55
+POST     POST /api/notifications/ticket                                                        170    220    240    260    320    430    510    550    570    570    570    183
+SSE      snapshot получен за                                                                   690    790    860    900   1000   1100   1100   1200   1300   1300   1300    182
+--------|--------------------------------------------------------------------------------|--------|------|------|------|------|------|------|------|------|------|------|------
+         Aggregated                                                                            440    550    640    700    940   1200   1400   1600   2100   2200   2200   6768
+

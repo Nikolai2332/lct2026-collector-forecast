@@ -1,0 +1,10 @@
+node_modules
+dist
+*.tmp.mjs
+test-results
+.env
+.env.*
+!.env.example
+.git
+check-real
+*.log

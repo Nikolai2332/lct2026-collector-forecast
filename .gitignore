@@ -1,0 +1,57 @@
+# Окружение и секреты
+.env
+*.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+.coverage
+htmlcov/
+
+# Данные заказчика не коммитим
+data/
+*.csv
+*.parquet
+!backend/tests/fixtures/*.csv
+
+# Локальные БД и артефакты
+*.db
+*.sqlite
+pgdata/
+.pgtmp/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Node (фронтенд)
+node_modules/
+dist/
+
+# ML: данные и производные (Parquet, признаки, модели, прогнозы) — вне git
+/data/
+*.7z
+ml/*.csv
+ml/artifacts/*.txt
+ml/artifacts/*.pkl
+ml/artifacts/*.joblib
+frontend/check-real/
+
+# Резервные копии БД (production) — вне git
+backups/
+*.dump
+
+# Копии событий, которые simulate_stream --purge-day сохраняет перед удалением
+sim_backup_events_*.csv
+
+# Нагрузочный тест: сырые CSV и замеры CPU (сводки *_summary.txt — в git)
+loadtest/results/*.csv
+loadtest/results/*_stats.txt
+Presentation/
