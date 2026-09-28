@@ -467,6 +467,21 @@ class RecommendationRef(Schema):
     text: str
 
 
+class OpenWorkOrderRef(Schema):
+    id: int
+    number: str = Field(examples=["ЗН-2026-000042"])
+    status: WorkOrderStatus
+    status_label: str
+
+
+class WorkOrderConflict(Schema):
+    """409: по датчику уже есть открытая заявка (черновик, отправлена, в работе) — новая не создаётся."""
+
+    detail: str = Field(examples=["По датчику уже есть открытая заявка ЗН-2026-000042 (черновик); откройте её или "
+                                  "закройте, прежде чем создавать новую"])
+    work_order: OpenWorkOrderRef
+
+
 class WorkOrderOut(Schema):
     id: int
     number: str = Field(examples=["ЗН-2026-000042"])
@@ -718,6 +733,13 @@ class MaintenanceAdvice(Schema):
     recommendation_id: int | None = Field(None, description="Строка справочника recommendations (code = rule:<rule_id>)")
     source: str = Field(examples=["Проект правил, требует согласования со специалистами эксплуатации"])
     rules_version: str
+    due_limit_hours: float | None = Field(
+        None, description="Регламентный срок устранения («не более», часов) по регламенту эксплуатации коллекторов "
+        "(РТЭКК); null — у правила нет аналога в регламенте. due_hours = min(срок по приоритету, этот срок)")
+    due_basis: str | None = Field(
+        None, description="Основание срока одной фразой: норма и пункт регламента; «по аналогии» — сопоставление "
+        "вида отказа с категорией регламента сделано командой и требует согласования",
+        examples=["по регламенту — не более 48 ч (ОПС, кат. III), РТЭКК п. 10.3.6–10.3.7, табл. 10.2; по аналогии"])
 
 
 class MaintenancePlanItem(Schema):

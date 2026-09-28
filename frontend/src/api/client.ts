@@ -2,9 +2,12 @@ const TOKEN_KEY = 'collector.token';
 
 export class ApiError extends Error {
   readonly status: number;
-  constructor(status: number, message: string) {
+  /** Разобранное тело ответа (например, 409 при создании заявки несёт открытую заявку `work_order`) */
+  readonly body?: unknown;
+  constructor(status: number, message: string, body?: unknown) {
     super(message);
     this.status = status;
+    this.body = body;
   }
 }
 
@@ -47,17 +50,21 @@ export function buildQuery(params?: Record<string, QueryValue>): string {
   return s ? `?${s}` : '';
 }
 
-async function errorMessage(res: Response): Promise<string> {
+async function apiError(res: Response): Promise<ApiError> {
+  let body: { detail?: unknown } | undefined;
   try {
-    const body = (await res.json()) as { detail?: unknown };
-    if (typeof body.detail === 'string') return body.detail;
-    if (Array.isArray(body.detail))
-      return body.detail.map((d: { msg?: string }) => d.msg ?? '').filter(Boolean).join('; ') || res.statusText;
+    body = (await res.json()) as { detail?: unknown };
   } catch {
     /* не JSON */
   }
-  if (res.status >= 500) return 'Сервер недоступен или вернул ошибку. Попробуйте ещё раз.';
-  return res.statusText || `Ошибка ${res.status}`;
+  const detail = body?.detail;
+  let message: string;
+  if (typeof detail === 'string') message = detail;
+  else if (Array.isArray(detail))
+    message = detail.map((d: { msg?: string }) => d.msg ?? '').filter(Boolean).join('; ') || res.statusText;
+  else if (res.status >= 500) message = 'Сервер недоступен или вернул ошибку. Попробуйте ещё раз.';
+  else message = res.statusText || `Ошибка ${res.status}`;
+  return new ApiError(res.status, message, body);
 }
 
 export interface RequestOptions {
@@ -90,7 +97,7 @@ export async function rawRequest(path: string, opts: RequestOptions = {}): Promi
     tokenStore.set(null);
     onUnauthorized();
   }
-  if (!res.ok) throw new ApiError(res.status, await errorMessage(res));
+  if (!res.ok) throw await apiError(res);
   return res;
 }
 

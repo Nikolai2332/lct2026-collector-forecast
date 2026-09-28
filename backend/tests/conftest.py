@@ -96,6 +96,24 @@ def auth(tokens):
     return headers
 
 
+@pytest.fixture(scope="session")
+def free_predictions(client, auth, session_factory):
+    """Прогнозы (id) на срезе по датчикам без открытой заявки — по одному датчику можно открыть только одну заявку.
+    Открытые заявки проверяются на момент вызова: демо-сид и другие тесты могли их создать."""
+    def pick(at: str, limit: int = 50) -> list[int]:
+        from sqlalchemy import select
+
+        from app.labels import OPEN_WORK_ORDER_STATUSES
+        from app.models import WorkOrder
+
+        items = client.get("/api/predictions", params={"at": at, "limit": limit}, headers=auth()).json()["items"]
+        with session_factory() as s:
+            busy = set(s.scalars(select(WorkOrder.channel_id).where(WorkOrder.status.in_(OPEN_WORK_ORDER_STATUSES))))
+        return [i["prediction_id"] for i in items if i["channel"]["id"] not in busy]
+
+    return pick
+
+
 @pytest.fixture(autouse=True)
 def _reset_rate_limits():
     # Лимиты входа и загрузок живут в памяти процесса — между тестами обнуляем

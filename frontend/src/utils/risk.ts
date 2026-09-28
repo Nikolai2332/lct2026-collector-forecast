@@ -4,7 +4,7 @@ export const RISK_LEVELS: RiskLevel[] = ['critical', 'risk', 'attention', 'norma
 
 export const RISK_META: Record<RiskLevel, { label: string; color: string; bg: string; order: number }> = {
   normal: { label: 'Норма', color: '#389e0d', bg: '#f6ffed', order: 0 },
-  attention: { label: 'Внимание', color: '#d4b106', bg: '#feffe6', order: 1 },
+  attention: { label: 'Внимание', color: '#3a3dd6', bg: '#f0f0ff', order: 1 },
   risk: { label: 'Риск', color: '#d46b08', bg: '#fff7e6', order: 2 },
   critical: { label: 'Критично', color: '#cf1322', bg: '#fff1f0', order: 3 },
 };
@@ -14,13 +14,13 @@ export const RISK_META: Record<RiskLevel, { label: string; color: string; bg: st
 const PALETTE: Record<'light' | 'dark', Record<RiskLevel, { color: string; bg: string }>> = {
   light: {
     normal: { color: '#389e0d', bg: '#f6ffed' },
-    attention: { color: '#d4b106', bg: '#feffe6' },
+    attention: { color: '#3a3dd6', bg: '#f0f0ff' },
     risk: { color: '#d46b08', bg: '#fff7e6' },
     critical: { color: '#cf1322', bg: '#fff1f0' },
   },
   dark: {
     normal: { color: '#73d13d', bg: '#162312' },
-    attention: { color: '#fadb14', bg: '#2b2611' },
+    attention: { color: '#a5a0ff', bg: '#1c1a40' },
     risk: { color: '#ffa940', bg: '#2b1d11' },
     critical: { color: '#ff7875', bg: '#2a1215' },
   },

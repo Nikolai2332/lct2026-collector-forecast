@@ -2279,6 +2279,16 @@
             },
             "description": "Forbidden"
           },
+          "409": {
+            "description": "По датчику уже есть открытая заявка (черновик, отправлена, в работе) — в теле её номер",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderConflict"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -6781,6 +6791,33 @@
           "rules_version": {
             "type": "string",
             "title": "Rules Version"
+          },
+          "due_limit_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due Limit Hours",
+            "description": "Регламентный срок устранения («не более», часов) по регламенту эксплуатации коллекторов (РТЭКК); null — у правила нет аналога в регламенте. due_hours = min(срок по приоритету, этот срок)"
+          },
+          "due_basis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due Basis",
+            "description": "Основание срока одной фразой: норма и пункт регламента; «по аналогии» — сопоставление вида отказа с категорией регламента сделано командой и требует согласования",
+            "examples": [
+              "по регламенту — не более 48 ч (ОПС, кат. III), РТЭКК п. 10.3.6–10.3.7, табл. 10.2; по аналогии"
+            ]
           }
         },
         "type": "object",
@@ -7649,6 +7686,44 @@
           "items"
         ],
         "title": "ObjectTree"
+      },
+      "OpenWorkOrderRef": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "number": {
+            "type": "string",
+            "title": "Number",
+            "examples": [
+              "ЗН-2026-000042"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "submitted",
+              "in_progress",
+              "done",
+              "cancelled"
+            ],
+            "title": "Status"
+          },
+          "status_label": {
+            "type": "string",
+            "title": "Status Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "number",
+          "status",
+          "status_label"
+        ],
+        "title": "OpenWorkOrderRef"
       },
       "Outcome": {
         "properties": {
@@ -9137,6 +9212,27 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "WorkOrderConflict": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "examples": [
+              "По датчику уже есть открытая заявка ЗН-2026-000042 (черновик); откройте её или закройте, прежде чем создавать новую"
+            ]
+          },
+          "work_order": {
+            "$ref": "#/components/schemas/OpenWorkOrderRef"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail",
+          "work_order"
+        ],
+        "title": "WorkOrderConflict",
+        "description": "409: по датчику уже есть открытая заявка (черновик, отправлена, в работе) — новая не создаётся."
       },
       "WorkOrderIn": {
         "properties": {

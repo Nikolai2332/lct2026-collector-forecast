@@ -85,6 +85,23 @@ export function DecisionTag({ decision }: { decision?: DecisionOut | null }) {
   );
 }
 
+/** По датчику уже открыта заявка — вместо кнопки создания: ссылка на неё и подсказка (сервер вторую не создаст, 409) */
+export function OpenWorkOrderNotice({ orders }: { orders: { id: number; number: string; status: WorkOrderStatus }[] }) {
+  return (
+    <div className="open-work-order-notice">
+      <Typography.Text type="secondary">По датчику уже открыта заявка:</Typography.Text>
+      <div>
+        {orders.map((w) => (
+          <WorkOrderTag key={w.id} id={w.id} number={w.number} status={w.status} />
+        ))}
+      </div>
+      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+        Новую заявку можно создать после её выполнения или отмены.
+      </Typography.Text>
+    </div>
+  );
+}
+
 export function WorkOrderTag({ id, status, number }: { id: number; status?: WorkOrderStatus | null; number?: string }) {
   return (
     <AtLink to={`/work-orders/${id}`}>

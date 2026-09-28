@@ -2,13 +2,16 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, App, Button, Col, DatePicker, Descriptions, Form, Input, Modal, Row, Select, Spin } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { ApiError } from '@/api/client';
 import { api } from '@/api/endpoints';
-import { invalidateAfterWorkOrder, useRecommendation, useRecommendations } from '@/api/queries';
+import { invalidateAfterWorkOrder, sendToWork, SendToWorkError, useRecommendation, useRecommendations } from '@/api/queries';
 import { useAt, useAtNavigate } from '@/hooks/useAt';
-import type { ChannelRef, FactorHuman, MaintenanceAdvice, ObjectRef, RiskLevel, WorkOrderPriority } from '@/types';
+import { useAuth } from '@/hooks/useAuth';
+import type { ChannelRef, FactorHuman, MaintenanceAdvice, ObjectRef, RiskLevel, WorkOrderConflict, WorkOrderPriority } from '@/types';
 import { humanFactors } from '@/utils/factors';
-import { WO_PRIORITY_DUE_HOURS, WO_PRIORITY_LABELS } from '@/utils/labels';
-import { toApi } from '@/utils/time';
+import { WO_PRIORITY_DUE_HOURS, WO_PRIORITY_LABELS, WO_STATUS_LABELS } from '@/utils/labels';
+import { dueText, toApi } from '@/utils/time';
+import { WorkOrderTag } from './cells';
 import { RiskBadge } from './RiskBadge';
 
 export interface WorkOrderSource {
@@ -46,13 +49,20 @@ const PRIORITY_BY_RISK: Record<RiskLevel, WorkOrderPriority> = {
 
 const describe = (s: WorkOrderSource, advice?: MaintenanceAdvice) => {
   const reasons = humanFactors({ factors: s.factors ?? [], factors_human: s.factors_human }).map((f) => `— ${f.text}`);
-  const rec = advice ? [`Рекомендация (${advice.title}): ${advice.reason}`, ...(advice.avoid ?? []).map((x) => `Не делать: ${x}`)] : [];
+  const rec = advice
+    ? [
+        `Рекомендация (${advice.title}): ${advice.reason}`,
+        ...(advice.due_basis ? [`Срок: ${dueText(advice.due_hours)} (${advice.due_basis}).`] : []),
+        ...(advice.avoid ?? []).map((x) => `Не делать: ${x}`),
+      ]
+    : [];
   return reasons.length || rec.length
     ? [`Черновик из прогноза отказа на 24 ч по датчику «${s.channel.name}».`, ...rec, ...(reasons.length ? ['Причины прогноза:', ...reasons] : [])].join('\n')
     : `Заявка по датчику «${s.channel.name}».`;
 };
 
-/** Черновик заявки с автозаполнением: объект, датчик, причина, рекомендация, срок, приоритет. */
+/** Заявка с автозаполнением: объект, датчик, причина, рекомендация, срок, приоритет.
+ * «Отправить в работу» создаёт заявку и сразу переводит её в «В работе»; «Сохранить черновик» — только создаёт. */
 export function WorkOrderModal({ open, source, onClose }: Props) {
   const [form] = Form.useForm<FormValues>();
   const [at] = useAt();
@@ -62,6 +72,9 @@ export function WorkOrderModal({ open, source, onClose }: Props) {
   const [picked, setPicked] = useState<number | null>(null);
   const [search, setSearch] = useState('');
   const dueTouched = useRef(false);
+  // Какой кнопкой отправлена форма: сразу в работу или черновиком
+  const toWork = useRef(false);
+  const { canChangeStatus } = useAuth();
   const base = useMemo(() => (at ? dayjs(at) : dayjs().startOf('minute')), [at]);
 
   // Выбор датчика, если заявка создаётся со страницы «Заявки»
@@ -130,11 +143,14 @@ export function WorkOrderModal({ open, source, onClose }: Props) {
     form.resetFields();
     setPicked(null);
     setSearch('');
+    save.reset();
   };
 
+  // Двойной клик: второе нажатие, пока запрос идёт, игнорируется (кнопки к тому же блокируются)
+  const inFlight = useRef(false);
   const save = useMutation({
-    mutationFn: (v: FormValues) =>
-      api.createWorkOrder(
+    mutationFn: async (v: FormValues) => {
+      const wo = await api.createWorkOrder(
         {
           prediction_id: effective?.prediction_id ?? null,
           channel_id: effective?.prediction_id ? null : effective!.channel.id,
@@ -147,38 +163,91 @@ export function WorkOrderModal({ open, source, onClose }: Props) {
           assignee: v.assignee || null,
         },
         at,
-      ),
-    onSuccess: (wo) => {
+      );
+      if (!toWork.current) return { wo };
+      // Заявка уже создана: сбой перевода в работу не должен терять её — сообщаем и даём ссылку
+      try {
+        return { wo: await sendToWork(wo.id, at) };
+      } catch (e) {
+        return e instanceof SendToWorkError
+          ? { wo: e.wo, error: e.message }
+          : { wo, error: `Черновик заявки ${wo.number} сохранён, но не отправлен: ${e instanceof Error ? e.message : 'ошибка сервера'}.` };
+      }
+    },
+    onSuccess: ({ wo, error }) => {
       invalidateAfterWorkOrder(qc);
-      message.success({
-        content: (
-          <span>
-            Черновик заявки {wo.number} сохранён.{' '}
-            <Button type="link" size="small" onClick={() => nav(`/work-orders/${wo.id}`)} style={{ padding: 0 }}>
-              Открыть
-            </Button>
-          </span>
-        ),
-        duration: 6,
-      });
+      const link = (
+        <Button type="link" size="small" onClick={() => nav(`/work-orders/${wo.id}`)} style={{ padding: 0 }}>
+          Открыть
+        </Button>
+      );
+      if (error) message.error({ content: <span>{error} {link}</span>, duration: 10 });
+      else
+        message.success({
+          content: (
+            <span>
+              {wo.status === 'draft' ? `Черновик заявки ${wo.number} сохранён.` : `Заявка ${wo.number} создана, статус «${WO_STATUS_LABELS[wo.status]}».`}{' '}
+              {link}
+            </span>
+          ),
+          duration: 6,
+        });
       reset();
       onClose();
     },
+    // 409: по датчику уже открыта заявка — окно показывает её номер и ссылку, данные страницы обновляются
+    onError: (e) => {
+      if (e instanceof ApiError && e.status === 409) invalidateAfterWorkOrder(qc);
+    },
+    onSettled: () => {
+      inFlight.current = false;
+    },
   });
+  const conflict =
+    save.error instanceof ApiError && save.error.status === 409 && (save.error.body as WorkOrderConflict | undefined)?.work_order
+      ? (save.error.body as WorkOrderConflict)
+      : null;
+  const submit = (work: boolean) => {
+    if (inFlight.current || save.isPending) return;
+    toWork.current = work;
+    form.submit();
+  };
+  const close = () => {
+    reset();
+    onClose();
+  };
 
   return (
     <Modal
       open={open}
-      title="Черновик заявки на обслуживание"
-      okText="Сохранить черновик"
-      cancelText="Отмена"
-      onOk={() => form.submit()}
-      okButtonProps={{ disabled: !effective }}
-      onCancel={() => {
-        reset();
-        onClose();
-      }}
-      confirmLoading={save.isPending}
+      title="Заявка на обслуживание"
+      onCancel={close}
+      footer={[
+        <Button key="cancel" onClick={close}>
+          Отмена
+        </Button>,
+        <Button
+          key="draft"
+          disabled={!effective || !!conflict || (save.isPending && toWork.current)}
+          loading={save.isPending && !toWork.current}
+          onClick={() => submit(false)}
+        >
+          Сохранить черновик
+        </Button>,
+        ...(canChangeStatus
+          ? [
+              <Button
+                key="work"
+                type="primary"
+                disabled={!effective || !!conflict || (save.isPending && !toWork.current)}
+                loading={save.isPending && toWork.current}
+                onClick={() => submit(true)}
+              >
+                Отправить в работу
+              </Button>,
+            ]
+          : []),
+      ]}
       width={760}
       destroyOnHidden
     >
@@ -223,11 +292,32 @@ export function WorkOrderModal({ open, source, onClose }: Props) {
           description="Приоритет, срок, исполнитель, действие и описание — из правил ТО (проект правил). Любое поле можно изменить."
         />
       )}
-      {save.isError && <Alert type="error" showIcon message={(save.error as Error).message} style={{ marginBottom: 12 }} />}
+      {conflict ? (
+        <Alert
+          type="warning"
+          showIcon
+          style={{ marginBottom: 12 }}
+          message="Новая заявка не создана"
+          description={
+            <span>
+              {conflict.detail}.{' '}
+              <span onClick={close} role="presentation">
+                <WorkOrderTag id={conflict.work_order.id} number={conflict.work_order.number} status={conflict.work_order.status} />
+              </span>
+            </span>
+          }
+        />
+      ) : (
+        save.isError && <Alert type="error" showIcon message={(save.error as Error).message} style={{ marginBottom: 12 }} />
+      )}
       <Form
         form={form}
         layout="vertical"
-        onFinish={(v) => save.mutate(v)}
+        onFinish={(v) => {
+          if (inFlight.current) return;
+          inFlight.current = true;
+          save.mutate(v);
+        }}
         disabled={!effective}
         onValuesChange={(changed: Partial<FormValues>) => {
           if ('due_at' in changed) dueTouched.current = true;

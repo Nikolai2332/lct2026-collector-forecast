@@ -13,7 +13,7 @@ $out = Join-Path $root "dist\submission"
 New-Item -ItemType Directory -Force $out | Out-Null
 $envArgs = @()
 if ($Real) {
-    $src = Join-Path $root "backups\prompt10_real\clean_slice"
+    $src = Join-Path $root "backups\ui_fixes_real"
     $dst = Join-Path $sub "build\real"
     New-Item -ItemType Directory -Force $dst | Out-Null
     foreach ($f in "01_dashboard", "04_channel", "03_objects_scheme", "05b_events", "07_quality") {

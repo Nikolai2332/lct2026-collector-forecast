@@ -1756,6 +1756,17 @@ export interface components {
             source: string;
             /** Rules Version */
             rules_version: string;
+            /**
+             * Due Limit Hours
+             * @description Регламентный срок устранения («не более», часов) по регламенту эксплуатации коллекторов (РТЭКК); null — у правила нет аналога в регламенте. due_hours = min(срок по приоритету, этот срок)
+             */
+            due_limit_hours?: number | null;
+            /**
+             * Due Basis
+             * @description Основание срока одной фразой: норма и пункт регламента; «по аналогии» — сопоставление вида отказа с категорией регламента сделано командой и требует согласования
+             * @example по регламенту — не более 48 ч (ОПС, кат. III), РТЭКК п. 10.3.6–10.3.7, табл. 10.2; по аналогии
+             */
+            due_basis?: string | null;
         };
         /** MaintenanceDraftSkipped */
         MaintenanceDraftSkipped: {
@@ -2100,6 +2111,23 @@ export interface components {
             snapshot_at?: string | null;
             /** Items */
             items: components["schemas"]["ObjectNode"][];
+        };
+        /** OpenWorkOrderRef */
+        OpenWorkOrderRef: {
+            /** Id */
+            id: number;
+            /**
+             * Number
+             * @example ЗН-2026-000042
+             */
+            number: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "submitted" | "in_progress" | "done" | "cancelled";
+            /** Status Label */
+            status_label: string;
         };
         /** Outcome */
         Outcome: {
@@ -2744,6 +2772,18 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /**
+         * WorkOrderConflict
+         * @description 409: по датчику уже есть открытая заявка (черновик, отправлена, в работе) — новая не создаётся.
+         */
+        WorkOrderConflict: {
+            /**
+             * Detail
+             * @example По датчику уже есть открытая заявка ЗН-2026-000042 (черновик); откройте её или закройте, прежде чем создавать новую
+             */
+            detail: string;
+            work_order: components["schemas"]["OpenWorkOrderRef"];
         };
         /** WorkOrderIn */
         WorkOrderIn: {
@@ -3827,6 +3867,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description По датчику уже есть открытая заявка (черновик, отправлена, в работе) — в теле её номер */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkOrderConflict"];
                 };
             };
             /** @description Validation Error */

@@ -21,7 +21,7 @@ import {
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '@/api/endpoints';
-import { AtLink, DecisionTag, OutcomeTag, SimulatedBadge, WorkOrderTag } from '@/components/cells';
+import { AtLink, DecisionTag, OpenWorkOrderNotice, OutcomeTag, SimulatedBadge, WorkOrderTag } from '@/components/cells';
 import { Chart } from '@/components/Chart';
 import { DecisionModal, type DecisionTarget } from '@/components/DecisionModal';
 import { FactorList } from '@/components/Factors';
@@ -122,9 +122,13 @@ function PredictionBlock({ card }: { card: ChannelCard }) {
           <Space direction="vertical" style={{ width: '100%' }}>
             {canAct ? (
               <>
-                <Button type="primary" size="large" block icon={<FileAddOutlined />} onClick={() => setWo({ ...p })}>
-                  Создать заявку
-                </Button>
+                {openWO.length === 0 ? (
+                  <Button type="primary" size="large" block icon={<FileAddOutlined />} onClick={() => setWo({ ...p })}>
+                    Создать заявку
+                  </Button>
+                ) : (
+                  <OpenWorkOrderNotice orders={openWO} />
+                )}
                 <Button block icon={<FormOutlined />} onClick={() => setDecision({ target })}>
                   Отметить решение
                 </Button>
@@ -135,7 +139,7 @@ function PredictionBlock({ card }: { card: ChannelCard }) {
             ) : (
               <Typography.Text type="secondary">Роль «{user?.role_label}» — только просмотр</Typography.Text>
             )}
-            {openWO.length > 0 && (
+            {openWO.length > 0 && !canAct && (
               <div>
                 <Typography.Text type="secondary">Открытые заявки:</Typography.Text>
                 <div>

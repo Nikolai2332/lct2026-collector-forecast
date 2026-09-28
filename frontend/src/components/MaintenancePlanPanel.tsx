@@ -120,7 +120,11 @@ export function MaintenancePlanPanel() {
       width: 150,
       render: (_, r) =>
         r.item ? (
-          <Tooltip title={`до ${fmtDateTime(r.item.advice.due_at)}`}>{dueText(r.item.advice.due_hours)}</Tooltip>
+          <Tooltip
+            title={`до ${fmtDateTime(r.item.advice.due_at)}${r.item.advice.due_basis ? `; ${r.item.advice.due_basis}` : ''}`}
+          >
+            {dueText(r.item.advice.due_hours)}
+          </Tooltip>
         ) : null,
     },
     { title: 'Кому', width: 190, responsive: ['xxl'], render: (_, r) => r.item?.advice.assignee ?? null },

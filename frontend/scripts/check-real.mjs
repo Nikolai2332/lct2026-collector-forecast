@@ -82,7 +82,7 @@ try {
   if (process.env.CREATE_WORK_ORDER !== 'false') {
     // Черновик заявки из прогноза — чтобы пройти список и карточку заявки (создаёт запись в БД)
     await page.getByRole('button', { name: 'Создать заявку' }).click();
-    await page.getByRole('dialog', { name: 'Черновик заявки на обслуживание' }).getByLabel('Исполнитель').waitFor();
+    await page.getByRole('dialog', { name: 'Заявка на обслуживание' }).getByLabel('Исполнитель').waitFor();
     const created = page.waitForResponse((r) => r.url().includes('/api/work-orders') && r.request().method() === 'POST');
     await page.getByRole('button', { name: 'Сохранить черновик' }).click();
     createdWorkOrderId = (await (await created).json()).id;

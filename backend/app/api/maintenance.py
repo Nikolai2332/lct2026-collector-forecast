@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app import schemas
 from app.api.predictions import load_predictions
-from app.api.work_orders import new_work_order
+from app.api.work_orders import OpenWorkOrderExists, new_work_order
 from app.access import Access, get_access, require
 from app.cache import cached
 from app.db import get_db
@@ -160,8 +160,13 @@ def drafts(
             wo.description = f"{wo.description}\n— «{p.channel.name}» (вероятность {round(p.prob * 100)}%)"
             skipped.append(schemas.MaintenanceDraftSkipped(prediction_id=p.id, reason=f"Включён в заявку {wo.number} на объект"))
             continue
-        wo = new_work_order(db, request, user, at, schemas.WorkOrderIn(prediction_id=p.id), p, p.channel, a,
-                            source="maintenance_plan")
+        try:
+            wo = new_work_order(db, request, user, at, schemas.WorkOrderIn(prediction_id=p.id), p, p.channel, a,
+                                source="maintenance_plan")
+        except OpenWorkOrderExists as e:
+            # Открытая сейчас (в том числе созданная позже момента «машины времени» или параллельным запросом)
+            skipped.append(schemas.MaintenanceDraftSkipped(prediction_id=p.id, reason=f"По датчику уже открыта заявка {e.wo.number}"))
+            continue
         if a.per_object:
             wo.description = f"{wo.description}\nДатчики объекта в этой заявке:\n— «{p.channel.name}» (вероятность {round(p.prob * 100)}%)"
             per_object[key] = wo

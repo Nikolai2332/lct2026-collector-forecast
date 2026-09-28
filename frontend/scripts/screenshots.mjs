@@ -15,6 +15,7 @@ import { createServer } from 'vite';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = resolve(root, '../docs/screenshots');
 const AT = '2026-08-01T12:00:00';
+const TOKEN_KEY = 'collector.token'; // как в src/api/client.ts
 
 const external = process.argv[2]?.replace(/\/$/, '');
 let server = null;
@@ -83,7 +84,7 @@ try {
     await dlg.getByRole('button', { name: 'Сохранить решение' }).click();
     await page.getByText('сохранено и появится в журнале').waitFor();
     await page.getByRole('button', { name: 'Создать заявку' }).click();
-    await page.getByRole('dialog', { name: 'Черновик заявки на обслуживание' }).getByLabel('Исполнитель').waitFor();
+    await page.getByRole('dialog', { name: 'Заявка на обслуживание' }).getByLabel('Исполнитель').waitFor();
     await page.waitForTimeout(500);
     await shoot(page, vp.dir, '04c_work_order_form');
     await page.getByRole('button', { name: 'Сохранить черновик' }).click();
@@ -102,6 +103,14 @@ try {
     await page.emulateMedia({ media: 'print' });
     await shoot(page, vp.dir, '06c_work_order_print', { full: true, print: true });
     await page.emulateMedia({ media: 'screen' });
+    // Свой черновик удаляем: по датчику может быть открыта только одна заявка, следующему проходу нужна кнопка
+    // «Создать заявку» на той же карточке
+    const woId = Number(new URL(page.url()).pathname.split('/').pop());
+    const deleted = await page.evaluate(async ({ id, key }) => {
+      const r = await fetch(`/api/work-orders/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${localStorage.getItem(key)}` } });
+      return r.status;
+    }, { id: woId, key: TOKEN_KEY });
+    if (deleted !== 204) throw new Error(`черновик ${woId} не удалён: ${deleted}`);
 
     await go(`/quality?at=2026-08-31T12:00:00`, 'canvas');
     await shoot(page, vp.dir, '07_quality');

@@ -27,6 +27,7 @@ import { accuracy30d, dailyFacts, modelMetrics, thresholdTable } from './analyti
 import {
   DECISION_LABELS,
   DUE_HOURS,
+  OPEN_STATUSES,
   PRIORITY_BY_RISK,
   PRIORITY_LABELS,
   STATUS_LABELS,
@@ -758,6 +759,17 @@ export const handlers: HttpHandler[] = [
         ch = CHANNEL_BY_ID.get(body.channel_id);
         if (!ch) return err(404, 'Датчик не найден');
       } else return validation(['body'], 'Укажите prediction_id или channel_id');
+      // Как на сервере: по датчику уже открыта заявка — 409 с её номером (фактический статус, без «машины времени»)
+      ensureWorkOrders();
+      const open = workOrders.find((w) => w.channel.id === ch!.id && OPEN_STATUSES.includes(w.status));
+      if (open)
+        return HttpResponse.json(
+          {
+            detail: `По датчику уже есть открытая заявка ${open.number} (${STATUS_LABELS[open.status].toLowerCase()}); откройте её или закройте, прежде чем создавать новую`,
+            work_order: { id: open.id, number: open.number, status: open.status, status_label: STATUS_LABELS[open.status] },
+          },
+          { status: 409 },
+        );
       const d = pid != null ? decodePrediction(pid)! : null;
       const priority: WorkOrderPriority =
         body.priority ?? (d ? PRIORITY_BY_RISK[riskOfProb(probOf(d.s, d.idx))] : 'medium');

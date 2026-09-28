@@ -53,6 +53,7 @@ STATUS_POWER_OFF = "Обесточен"
 CONDITIONS = {
     "kind", "group", "not_group", "min_risk", "max_risk", "mass_link", "faults_30d_min", "faults_90d_min",
     "same_kind_90d_min", "faults_since_repair_min", "low_precision_type", "flapping", "stuck_share_min",
+    "object_power_off_min",
 }
 VALUE_FAIL_GROUPS = {"sentinel", "date1970", "date_current", "gas5", "value_failures"}
 FACTS = {"current", "silence", "neighbors", "power", "fault_msgs", "flap", "repeats", "repair", "precision", "stuck", "values",
@@ -79,10 +80,32 @@ class Rule:
     plan: bool
     work_order: bool
     per_object: bool
+    due_limit: str | None = None  # набор регламентных сроков (due_limits)
 
     @property
     def code(self) -> str:
         return f"rule:{self.id}"
+
+
+@dataclass(frozen=True)
+class Norm:
+    """Регламентный срок устранения неисправности («не более»)."""
+
+    id: str
+    hours: float
+    label: str
+    clause: str
+    title: str
+    note: str | None = None
+
+
+@dataclass(frozen=True)
+class LimitCase:
+    """Случай набора регламентных сроков: условия (как в `when`) → норма. direct=False — «по аналогии»."""
+
+    when: dict
+    norm: str
+    direct: bool
 
 
 @dataclass(frozen=True)
@@ -93,6 +116,9 @@ class RuleSet:
     groups: dict[str, tuple[str, ...]]
     rules: tuple[Rule, ...]
     modifiers: dict[str, str]
+    norms: dict[str, Norm] = field(default_factory=dict)
+    due_limits: dict[str, tuple[LimitCase, ...]] = field(default_factory=dict)
+    regulation: str = ""  # краткое название регламента для основания срока
     # Группы по типу датчика считаются один раз: типов меньше двух десятков, а вызовов — тысячи
     _groups_memo: dict = field(default_factory=dict, compare=False, repr=False)
 
@@ -121,6 +147,26 @@ def parse_rules(data: dict) -> RuleSet:
     params.setdefault("min_priority_by_group", {})
     params.setdefault("group_silence_share", 0.5)
     groups = {g: tuple(str(w).lower() for w in words) for g, words in (data.get("sensor_groups") or {}).items()}
+    reg = data.get("regulation") or {}
+    norms = {
+        str(nid): Norm(id=str(nid), hours=float(n["hours"]), label=str(n.get("label") or f"{n['hours']} ч"),
+                       clause=str(n["clause"]), title=str(n.get("title") or ""), note=n.get("note"))
+        for nid, n in (reg.get("norms") or {}).items()
+    }
+    due_limits: dict[str, tuple[LimitCase, ...]] = {}
+    for name, cases in (data.get("due_limits") or {}).items():
+        parsed = []
+        for case in cases or []:
+            case = dict(case)
+            nid, direct = str(case.pop("norm", "")), bool(case.pop("direct", False))
+            if nid not in norms:
+                raise ValueError(f"Набор сроков {name}: неизвестная норма регламента {nid!r}")
+            if set(case) - CONDITIONS:
+                raise ValueError(f"Набор сроков {name}: неизвестные условия {sorted(set(case) - CONDITIONS)}")
+            if set(case.get("group", [])) - set(groups):
+                raise ValueError(f"Набор сроков {name}: неизвестная группа датчиков")
+            parsed.append(LimitCase(when=case, norm=nid, direct=direct))
+        due_limits[str(name)] = tuple(parsed)
     rules, seen = [], set()
     for raw in data.get("rules") or []:
         rid = str(raw["id"])
@@ -140,6 +186,9 @@ def parse_rules(data: dict) -> RuleSet:
         for key in ("group", "not_group"):
             if set(when.get(key, [])) - set(groups):
                 raise ValueError(f"Правило {rid}: неизвестная группа датчиков в {key}")
+        limit = raw.get("due_limit")
+        if limit is not None and limit not in due_limits:
+            raise ValueError(f"Правило {rid}: неизвестный набор регламентных сроков {limit!r}")
         if rid in seen:
             raise ValueError(f"Правило {rid} повторяется")
         seen.add(rid)
@@ -149,11 +198,13 @@ def parse_rules(data: dict) -> RuleSet:
             due_hours=float(raw["due_hours"]) if raw.get("due_hours") is not None else None,
             assignee=str(raw.get("assignee") or "—"), avoid=raw.get("avoid"), plan=bool(raw.get("plan", False)),
             work_order=bool(raw.get("work_order", True)), per_object=bool(raw.get("per_object", False)),
+            due_limit=str(limit) if limit is not None else None,
         ))
     if not rules or rules[-1].when:
         raise ValueError("Последнее правило должно быть без условий (when: {}) — чтобы рекомендация была всегда")
     modifiers = {str(m["id"]): str(m["avoid"]) for m in data.get("modifiers") or []}
-    return RuleSet(str(data.get("version", "")), str(data.get("source", "")), params, groups, tuple(rules), modifiers)
+    return RuleSet(str(data.get("version", "")), str(data.get("source", "")), params, groups, tuple(rules), modifiers,
+                   norms=norms, due_limits=due_limits, regulation=str(reg.get("short") or ""))
 
 
 _lock = threading.Lock()
@@ -236,6 +287,8 @@ class Advice:
     rules_version: str
     recommendation_code: str
     recommendation_id: int | None = None
+    due_limit_hours: float | None = None  # регламентный срок («не более»), если он есть для правила
+    due_basis: str | None = None  # «по регламенту — не более 48 ч (ОПС, кат. III), РТЭКК п. …; по аналогии»
 
 
 # ---------- Вид отказа: единственная точка ----------
@@ -434,7 +487,12 @@ def build_facts(ctx: Context, kind: str, rules: RuleSet) -> dict[str, str]:
 
 
 def matches(rule: Rule, ctx: Context, kind: str, rules: RuleSet) -> bool:
-    s, w, p = ctx.signals, rule.when, rules.params
+    return check_when(rule.when, ctx, kind, rules)
+
+
+def check_when(w: dict, ctx: Context, kind: str, rules: RuleSet) -> bool:
+    """Условия `when` правила или случая набора регламентных сроков."""
+    s, p = ctx.signals, rules.params
     groups = rules.groups_of(ctx.sensor_type)
     base_kind = "fault" if kind == "disconnected" else kind  # «Отключено устройство» в истории — вид fault
     same_kind = sum(n for k, n in s.faults_90d.items() if KIND_OF_FAULT.get(k) == base_kind)
@@ -454,6 +512,7 @@ def matches(rule: Rule, ctx: Context, kind: str, rules: RuleSet) -> bool:
         "low_precision_type": lambda v: (s.type_precision is not None and s.type_precision < p["low_precision"]) == bool(v),
         "flapping": lambda v: is_flapping(_factors(ctx.top_factors), p) == bool(v),
         "stuck_share_min": lambda v: (stuck_share(_factors(ctx.top_factors)) or 0) >= v,
+        "object_power_off_min": lambda v: s.object_power_off >= v,
     }
     return all(checks[k](v) for k, v in w.items())
 
@@ -487,6 +546,31 @@ def _group_floor(priority: str, groups: set[str], params: dict) -> str:
     return priority
 
 
+def due_text(hours: float) -> str:
+    """Как на фронтенде (utils/time.ts, dueText): меньше 48 ч — в часах, дальше — в сутках."""
+    return f"{round(hours)} ч" if hours < 48 else f"{round(hours / 24)} сут"
+
+
+def regulation_limit(rule: Rule, ctx: Context, kind: str, rules: RuleSet) -> tuple[Norm, bool] | None:
+    """Регламентный срок для правила и датчика: (норма, прямая ли она) или None — аналога в регламенте нет."""
+    if rule.due_limit is None:
+        return None
+    for case in rules.due_limits.get(rule.due_limit, ()):
+        if check_when(case.when, ctx, kind, rules):
+            return rules.norms[case.norm], case.direct
+    return None
+
+
+def due_basis_text(norm: Norm, direct: bool, regulation: str) -> str:
+    text = f"по регламенту — не более {norm.label}"
+    if norm.title:
+        text += f" ({norm.title})"
+    text += f", {regulation} п. {norm.clause}" if regulation else f", п. {norm.clause}"
+    if norm.note:
+        text += f"; {norm.note}"
+    return text if direct else text + "; по аналогии"
+
+
 def advise(ctx: Context, rules: RuleSet | None = None) -> Advice:
     rules = rules or load_rules()
     kind, basis = infer_fault_kind(ctx, rules)
@@ -501,6 +585,10 @@ def advise(ctx: Context, rules: RuleSet | None = None) -> Advice:
     if rule.work_order:
         priority = _group_floor(priority, groups, rules.params)
     due_hours = rule.due_hours if rule.due_hours is not None else float(rules.params["due_hours"][priority])
+    # Регламент ограничивает срок сверху: срочные случаи не удлиняются, медленные сокращаются до нормы
+    limit = regulation_limit(rule, ctx, kind, rules)
+    if limit is not None:
+        due_hours = min(due_hours, limit[0].hours)
     avoid = [rule.avoid] if rule.avoid else []
     s = ctx.signals
     if s.open_order and "open_order" in rules.modifiers and rule.work_order:
@@ -516,6 +604,8 @@ def advise(ctx: Context, rules: RuleSet | None = None) -> Advice:
         fault_kind_label=FAULT_KIND_LABELS[kind], fault_kind_basis=basis, plan=rule.plan, work_order=rule.work_order, per_object=rule.per_object,
         has_open_order=s.open_order is not None,
         source=rules.source, rules_version=rules.version, recommendation_code=rule.code,
+        due_limit_hours=limit[0].hours if limit else None,
+        due_basis=due_basis_text(*limit, rules.regulation) if limit else None,
     )
 
 
@@ -782,4 +872,5 @@ def to_schema(p: Prediction, a: Advice):
         due_hours=a.due_hours, due_at=a.due_at, assignee=a.assignee, avoid=a.avoid, fault_kind=a.fault_kind,
         fault_kind_label=a.fault_kind_label, fault_kind_basis=a.fault_kind_basis, plan=a.plan,
         work_order_needed=a.work_order, recommendation_id=a.recommendation_id, source=a.source, rules_version=a.rules_version,
+        due_limit_hours=a.due_limit_hours, due_basis=a.due_basis,
     )

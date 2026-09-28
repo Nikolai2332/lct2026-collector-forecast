@@ -198,7 +198,7 @@ uvicorn app.main:app --reload
 
 ```bash
 cd backend
-pytest                                # SQLite в памяти, ~50 секунд (461 тест)
+pytest                                # SQLite в памяти, ~60 секунд (488 тестов)
 
 # на PostgreSQL из docker compose (отдельная база, очищается тестами), ~3 минуты
 docker compose exec db createdb -U collector collector_test

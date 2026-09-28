@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi.responses import JSONResponse
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
@@ -10,9 +11,9 @@ from app.audit import audit
 from app.db import get_db
 from app.deps import Page, at_param, page_param
 from app.factors_human import humanize
-from app.labels import WORK_ORDER_STATUS_LABELS, WORK_ORDER_TRANSITIONS
+from app.labels import OPEN_WORK_ORDER_STATUSES, WORK_ORDER_STATUS_LABELS, WORK_ORDER_TRANSITIONS
 from app.models import Channel, Prediction, Reason, Recommendation, User, WorkOrder
-from app.recommendations.engine import PRIORITY_BY_RISK, Advice, advice_for
+from app.recommendations.engine import PRIORITY_BY_RISK, Advice, advice_for, due_text
 from app.risk import level_of
 from app.security import get_current_user
 from app.services import ObjectIndex, get_or_404, work_order_out
@@ -26,6 +27,37 @@ DUE_BY_PRIORITY = {
     "low": timedelta(days=7),
 }
 CLOSED_STATUSES = ("done", "cancelled")
+
+
+class OpenWorkOrderExists(Exception):
+    """По датчику уже есть открытая заявка — вторую не создаём (ответ 409 с её номером)."""
+
+    def __init__(self, wo: WorkOrder):
+        super().__init__(wo.number)
+        self.wo = wo
+
+    def body(self) -> dict:
+        label = WORK_ORDER_STATUS_LABELS[self.wo.status]
+        return schemas.WorkOrderConflict(
+            detail=f"По датчику уже есть открытая заявка {self.wo.number} ({label.lower()}); откройте её или закройте, "
+                   "прежде чем создавать новую",
+            work_order=schemas.OpenWorkOrderRef(id=self.wo.id, number=self.wo.number, status=self.wo.status, status_label=label),
+        ).model_dump()
+
+
+def lock_open_work_order(db: Session, channel_id: int) -> WorkOrder | None:
+    """Блокирует строку датчика до конца транзакции и возвращает его открытую заявку, если она есть.
+
+    Два одновременных запроса по одному датчику (двойной клик) выстраиваются в очередь на блокировке: второй ждёт
+    коммита первого и следующим запросом (в PostgreSQL READ COMMITTED — новый снимок) уже видит его заявку.
+    Смотрим фактический статус, без «машины времени»: открытая сейчас заявка — открытая. Уникальный индекс не
+    используется: в рабочих базах уже бывают по несколько открытых заявок на датчик, а их менять нельзя.
+    В SQLite (тесты, разработка) FOR UPDATE не поддерживается, но запись там и так идёт по одной."""
+    db.execute(select(Channel.id).where(Channel.id == channel_id).with_for_update())
+    return db.scalar(
+        select(WorkOrder).where(WorkOrder.channel_id == channel_id, WorkOrder.status.in_(OPEN_WORK_ORDER_STATUSES))
+        .order_by(WorkOrder.created_at.desc(), WorkOrder.id.desc()).limit(1)
+    )
 
 
 def _check_refs(db: Session, reason_id: int | None, recommendation_id: int | None) -> Recommendation | None:
@@ -54,6 +86,8 @@ def advice_description(pred: Prediction, advice: Advice | None) -> str:
     lines = [f"Прогноз отказа на 24 ч: вероятность {round(pred.prob * 100)}%, индекс здоровья {pred.health}."]
     if advice is not None:
         lines.append(f"Рекомендация ({advice.title}): {advice.reason}")
+        if advice.due_basis:
+            lines.append(f"Срок: {due_text(advice.due_hours)} ({advice.due_basis}).")
         lines += [f"Не делать: {x}" for x in advice.avoid]
     phrases = [h.text for h in humanize(pred.top_factors)]
     if phrases:
@@ -74,7 +108,10 @@ def new_work_order(
     source: str = "manual",
 ) -> WorkOrder:
     """Черновик заявки. Из прогноза поля по умолчанию берутся из рекомендации по ТО (движок правил);
-    всё, что передано явно, важнее. Коммит — за вызывающим."""
+    всё, что передано явно, важнее. Коммит — за вызывающим. Открытая заявка по датчику уже есть — OpenWorkOrderExists."""
+    existing = lock_open_work_order(db, channel.id)
+    if existing is not None:
+        raise OpenWorkOrderExists(existing)
     rec = _check_refs(db, body.reason_id, body.recommendation_id)
     if rec is None and advice is not None and advice.recommendation_id is not None:
         rec = db.get(Recommendation, advice.recommendation_id)
@@ -133,7 +170,12 @@ def new_work_order(
         "с обоснованием и причинами прогноза. Любое поле можно передать явно. "
         "`at` в запросе — момент «машины времени», которым датируется заявка."
     ),
-    responses={404: {"model": schemas.ErrorResponse}, 403: {"model": schemas.ErrorResponse}},
+    responses={
+        404: {"model": schemas.ErrorResponse},
+        403: {"model": schemas.ErrorResponse},
+        409: {"model": schemas.WorkOrderConflict,
+              "description": "По датчику уже есть открытая заявка (черновик, отправлена, в работе) — в теле её номер"},
+    },
 )
 def create_work_order(
     body: schemas.WorkOrderIn,
@@ -153,7 +195,11 @@ def create_work_order(
     if not idx.channel_visible(channel.object_id):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Датчик не найден")
     advice = advice_for(db, pred) if pred is not None else None
-    wo = new_work_order(db, request, user, at, body, pred, channel, advice)
+    try:
+        wo = new_work_order(db, request, user, at, body, pred, channel, advice)
+    except OpenWorkOrderExists as e:
+        db.rollback()
+        return JSONResponse(e.body(), status_code=status.HTTP_409_CONFLICT)
     db.commit()
     db.refresh(wo)
     return work_order_out(wo, idx)

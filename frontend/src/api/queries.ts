@@ -1,4 +1,5 @@
 import { type QueryClient, useQuery } from '@tanstack/react-query';
+import type { WorkOrderOut } from '@/types';
 import { useAt } from '@/hooks/useAt';
 import { api } from './endpoints';
 
@@ -55,4 +56,27 @@ export function invalidateAfterDecision(qc: QueryClient) {
 export function invalidateAfterWorkOrder(qc: QueryClient) {
   for (const key of ['workOrders', 'workOrder', 'journal', 'predictions', 'prediction', 'channel', 'summary', 'recommendation', 'maintenancePlan'])
     qc.invalidateQueries({ queryKey: [key] });
+}
+
+/** Первый шаг прошёл (заявка «Отправлена»), второй — нет */
+export class SendToWorkError extends Error {
+  readonly wo: WorkOrderOut;
+  constructor(wo: WorkOrderOut, cause: unknown) {
+    super(
+      `Заявка ${wo.number} отправлена, но не переведена в работу: ${cause instanceof Error ? cause.message : 'ошибка сервера'}. ` +
+        'Нажмите «Взять в работу» в заявке.',
+    );
+    this.wo = wo;
+  }
+}
+
+/** «Отправить в работу»: два штатных перехода подряд (черновик → отправлена → в работе), оба пишутся в журнал аудита.
+ * Статусы API не меняются — «Отправлена» остаётся для заявок, где второй шаг не прошёл. */
+export async function sendToWork(id: number, at?: string): Promise<WorkOrderOut> {
+  const sent = await api.patchWorkOrder(id, { status: 'submitted' }, at);
+  try {
+    return await api.patchWorkOrder(id, { status: 'in_progress' }, at);
+  } catch (e) {
+    throw new SendToWorkError(sent, e);
+  }
 }

@@ -7,6 +7,7 @@ import type { ChannelCard } from '@/types';
 import { RISK_META } from '@/utils/risk';
 import { WO_PRIORITY_COLORS } from '@/utils/labels';
 import { dueText, fmtDateTime } from '@/utils/time';
+import { OpenWorkOrderNotice } from './cells';
 import { WorkOrderModal } from './WorkOrderModal';
 
 /**
@@ -72,15 +73,23 @@ export function RecommendationCard({ card }: { card: ChannelCard }) {
                     Срок: <b>{dueText(a.due_hours)}</b>{' '}
                     <Typography.Text type="secondary">(до {fmtDateTime(a.due_at)})</Typography.Text>
                   </span>
+                  {a.due_basis && (
+                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                      {a.due_basis[0].toUpperCase() + a.due_basis.slice(1)}
+                    </Typography.Text>
+                  )}
                   <span>
                     Кому: <b>{a.assignee}</b>
                   </span>
                 </>
               )}
-              {canAct && a.work_order_needed && (
+              {canAct && a.work_order_needed && card.open_work_orders.length === 0 && (
                 <Button type="primary" ghost block icon={<FileAddOutlined />} onClick={() => setOpen(true)}>
                   Заявка по рекомендации
                 </Button>
+              )}
+              {canAct && a.work_order_needed && card.open_work_orders.length > 0 && (
+                <OpenWorkOrderNotice orders={card.open_work_orders} />
               )}
             </Space>
           </Col>

@@ -46,6 +46,7 @@ export type RecommendationOut = S['RecommendationOut'];
 export type Dictionaries = S['Dictionaries'];
 export type WorkOrderIn = S['WorkOrderIn'];
 export type WorkOrderOut = S['WorkOrderOut'];
+export type WorkOrderConflict = S['WorkOrderConflict'];
 export type WorkOrderList = S['WorkOrderList'];
 export type WorkOrderPatch = S['WorkOrderPatch'];
 export type WorkOrderShort = S['WorkOrderShort'];

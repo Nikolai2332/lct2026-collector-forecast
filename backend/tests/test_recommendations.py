@@ -1,7 +1,7 @@
 """Рекомендации по ТО: каждое правило, обоснование, стабильность, API."""
 
 from collections import Counter
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytest
 import yaml
@@ -213,7 +213,9 @@ def test_rules_file_is_valid_and_marked_as_draft():
     r = load_rules()
     assert "требует согласования" in r.source
     assert not r.rules[-1].when  # последнее правило срабатывает всегда
-    assert "РТЭК" not in RULES_PATH.read_text(encoding="utf-8").split("rules:")[1]  # пункты регламентов не цитируются
+    # Пункты регламента — только в разделе regulation; правила ссылаются на наборы сроков по имени
+    assert "РТЭКК" not in RULES_PATH.read_text(encoding="utf-8").split("\nrules:")[1]
+    assert r.regulation == "РТЭКК" and r.norms and r.due_limits
 
 
 @pytest.mark.parametrize("patch,msg", [
@@ -233,6 +235,90 @@ def test_last_rule_must_be_catch_all():
     data = yaml.safe_load(RULES_PATH.read_text(encoding="utf-8"))
     data["rules"] = data["rules"][:-1]
     with pytest.raises(ValueError, match="без условий"):
+        parse_rules(data)
+
+
+# ---------- Регламентные сроки (РТЭКК) ----------
+
+
+LINK = [{"feature": "hours_since_event", "value": 130.0, "norm": 20.0, "phrase": "Часов с последнего события: 130"}]
+UNIT = [{"feature": "starts_24h", "value": 30, "norm": 6, "phrase": "Пусков за сутки: 30"}]
+
+
+@pytest.mark.parametrize("sensor,risk,factors,signals,rule,due,limit,clause,analogy", [
+    # ОПС: одиночная потеря связи — периодические отказы извещателей (кат. III), срок по приоритету 72 → 48
+    ("Датчик дыма", "attention", LINK, {}, "single_link", 48, 48, "10.3.6–10.3.7, табл. 10.2", True),
+    ("КД Дверь", "attention", LINK, {}, "single_link", 48, 48, "10.3.6–10.3.7, табл. 10.2", True),
+    # ОПС: молчит группа извещателей объекта (кат. II, 16 ч); критичный срок 4 ч не удлиняется
+    ("Датчик дыма", "critical", LINK, {"neighbors_silent": 9, "object_channels": 60}, "mass_link_loss", 4, 16,
+     "10.3.6–10.3.7, табл. 10.2", True),
+    # Газ: 24 ч (п. 11.5.7), приоритет газовых не ниже «высокого» — тоже 24 ч
+    ("Газовый датчик", "attention", LINK, {}, "single_link", 24, 24, "11.5.7", True),
+    # Насос без признака подтопления — 3 суток (п. 6.4.27), прямая норма
+    ("Состояние насоса", "attention", UNIT, {}, "pump_unit", 72, 72, "6.4.27", False),
+    # Вентилятор — диспетчерское управление, кат. II
+    ("Вентилятор", "attention", UNIT, {}, "fan_unit", 48, 48, "12.5.12–12.5.13, табл. 12.4", True),
+    # ИБП и питание — 48 ч (п. 9.4.23); массово по объекту — 3 суток (п. 9.4.24)
+    ("ИБП", "attention", UNIT, {}, "ups_check", 48, 48, "9.4.23", False),
+    ("Состояние фазы", "attention", [], {"power_off_24h": 2}, "power_object", 24, 48, "9.4.23", False),
+    ("КД Дверь", "risk", LINK, {"object_power_off": 3}, "power_object", 24, 72, "9.4.24", True),
+    # Повторные и массовые потери связи насоса, фазы, вентилятора — срок агрегата или электрики «по аналогии»
+    ("Состояние насоса", "attention", LINK, {"faults_90d": Counter({"Пропадание связи": 3})}, "chronic_link", 72, 72, "6.4.27", True),
+    ("Состояние фазы", "risk", LINK, {"neighbors_silent": 9, "object_channels": 60}, "mass_link_loss", 24, 48, "9.4.23", True),
+    ("Вентилятор", "risk", LINK, {"neighbors_silent": 9, "object_channels": 60}, "mass_link_loss", 24, 48,
+     "12.5.12–12.5.13, табл. 12.4", True),
+])
+def test_due_is_min_of_priority_and_regulation(rules, sensor, risk, factors, signals, rule, due, limit, clause, analogy):
+    a = advise(ctx(sensor=sensor, risk=risk, prob=0.5, factors=factors, **signals), rules)
+    assert a.rule_id == rule
+    assert a.due_limit_hours == limit
+    assert a.due_hours == min(float(rules.params["due_hours"][a.priority]), limit) == due
+    assert a.due_at == AT + timedelta(hours=due)
+    assert f"РТЭКК п. {clause}" in a.due_basis
+    assert a.due_basis.startswith("по регламенту — не более ")
+    assert a.due_basis.endswith("; по аналогии") == analogy
+
+
+def test_pump_basis_says_flooding_is_not_considered(rules):
+    a = advise(ctx(sensor="Состояние насоса", risk="attention", prob=0.5, factors=UNIT), rules)
+    assert "не более 3 суток (насосы, без подтопления)" in a.due_basis and "1 сутки, п. 6.4.25" in a.due_basis
+
+
+@pytest.mark.parametrize("sensor,risk,factors,signals,rule", [
+    ("Датчик температуры", "attention", LINK, {}, "single_link"),  # группа без аналога в регламенте
+    ("Датчик дыма", "attention", LINK, {"type_precision": 0.2}, "verify_remote_first"),
+    ("Датчик движения", "attention", [], {}, "watch"),
+    ("Датчик движения", "normal", [], {}, "routine"),
+])
+def test_rules_without_regulation_analog_keep_old_due(rules, sensor, risk, factors, signals, rule):
+    a = advise(ctx(sensor=sensor, risk=risk, prob=0.5, factors=factors, **signals), rules)
+    assert a.rule_id == rule
+    assert a.due_limit_hours is None and a.due_basis is None
+    r = rules.rule(rule)
+    assert a.due_hours == (r.due_hours if r.due_hours is not None else rules.params["due_hours"][a.priority])
+
+
+def test_rules_without_regulation_section_still_load():
+    """Обратная совместимость: файл правил без regulation / due_limits — сроки как раньше."""
+    data = yaml.safe_load(RULES_PATH.read_text(encoding="utf-8"))
+    data.pop("regulation"), data.pop("due_limits")
+    for raw in data["rules"]:
+        raw.pop("due_limit", None)
+    old = parse_rules(data)
+    a = advise(ctx(sensor="Датчик дыма", risk="attention", prob=0.5, factors=LINK), old)
+    assert (a.due_hours, a.due_limit_hours, a.due_basis) == (72.0, None, None)
+
+
+@pytest.mark.parametrize("mutate,msg", [
+    (lambda d: d["rules"][1].update({"due_limit": "nosuch"}), "неизвестный набор регламентных сроков"),
+    (lambda d: d["due_limits"]["by_group"].append({"norm": "nosuch"}), "неизвестная норма"),
+    (lambda d: d["due_limits"]["by_group"].append({"norm": "power", "bogus": 1}), "неизвестные условия"),
+    (lambda d: d["due_limits"]["by_group"].append({"norm": "power", "group": ["nosuch"]}), "неизвестная группа"),
+])
+def test_regulation_errors_are_loud(mutate, msg):
+    data = yaml.safe_load(RULES_PATH.read_text(encoding="utf-8"))
+    mutate(data)
+    with pytest.raises(ValueError, match=msg):
         parse_rules(data)
 
 
@@ -268,8 +354,9 @@ def test_dictionary_has_rule_rows(client, auth):
     assert "rule:routine" not in codes  # правила без заявки неактивны в справочнике
 
 
-def test_work_order_prefilled_from_recommendation(client, auth):
-    top = client.get("/api/predictions", params={"at": DEMO_AT, "limit": 1}, headers=auth()).json()["items"][0]
+def test_work_order_prefilled_from_recommendation(client, auth, free_predictions):
+    pid = free_predictions(DEMO_AT)[0]
+    top = {"prediction_id": pid}
     advice = client.get(f"/api/predictions/{top['prediction_id']}/recommendation", headers=auth()).json()
     r = client.post("/api/work-orders", params={"at": DEMO_AT}, json={"prediction_id": top["prediction_id"]}, headers=auth())
     assert r.status_code == 201, r.text
@@ -278,13 +365,15 @@ def test_work_order_prefilled_from_recommendation(client, auth):
     assert wo["recommendation_text"] == advice["action"]
     assert wo["recommendation"]["id"] == advice["recommendation_id"]
     assert advice["reason"] in wo["description"]
+    if advice["due_basis"]:
+        assert advice["due_basis"] in wo["description"]
     assert wo["assignee"] == advice["assignee"]
-    # Явные значения диспетчера важнее рекомендации
+    assert client.delete(f"/api/work-orders/{wo['id']}", headers=auth()).status_code == 204
+    # Явные значения диспетчера важнее рекомендации (прежний черновик удалён: открытая заявка на датчик — одна)
     r2 = client.post("/api/work-orders", params={"at": DEMO_AT},
                      json={"prediction_id": top["prediction_id"], "priority": "low", "recommendation_text": "Своё"}, headers=auth())
     assert (r2.json()["priority"], r2.json()["recommendation_text"]) == ("low", "Своё")
-    for w in (wo, r2.json()):
-        assert client.delete(f"/api/work-orders/{w['id']}", headers=auth()).status_code == 204
+    assert client.delete(f"/api/work-orders/{r2.json()['id']}", headers=auth()).status_code == 204
 
 
 def test_journal_has_recommendation(client, auth):
